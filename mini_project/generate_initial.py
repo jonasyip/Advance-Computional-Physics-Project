@@ -35,16 +35,15 @@ data = {
     "x_position (pc)" : x_list,
     "y_position (pc)" : y_list,
     "z_position (pc)" : z_list,
-    "Mass (kg)" : mass_list 
+    "Mass (M_sun)" : mass_list 
 }
-
 
 # fig = plt.figure(figsize=(6, 6))
 # plt.scatter(x_list, z_list)
 # plt.show()
 
-filename = "initial_conditions.csv"
+filename = "intial_conditions.csv"
 df = pd.DataFrame(data)
-df.to_csv('filename')
+df.to_csv(filename)
 
 print("%s created" % (filename))
