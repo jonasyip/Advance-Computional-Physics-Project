@@ -42,7 +42,7 @@ data = {
 # plt.scatter(x_list, z_list)
 # plt.show()
 
-filename = "intial_conditions.csv"
+filename = "initial_conditions.csv"
 df = pd.DataFrame(data)
 df.to_csv(filename)
 
