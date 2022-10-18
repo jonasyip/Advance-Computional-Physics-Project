@@ -41,15 +41,15 @@ class quad_tree:
         #NORTH WEST
         northWest_boundary = boundary(
                 self.centre_x + (self.width * 0.5),
-                self.centre_y + (self.height * 0.5),
+                self.centre_y - (self.height * 0.5),
                 (self.width * 0.5),
                 (self.height * 0.5))
         self.northWest = quad_tree(northWest_boundary)
         
         #NORTH EAST
         northEast_boundary = boundary(
-                self.centre_x + (self.width * 0.5),
-                self.centre_y + (self.height * 0.5),
+                self.centre_x - (self.width * 0.5),
+                self.centre_y - (self.height * 0.5),
                 (self.width * 0.5),
                 (self.height * 0.5))
         self.northEast = quad_tree(northEast_boundary)
@@ -60,11 +60,11 @@ class quad_tree:
                 self.centre_y + (self.height * 0.5),
                 (self.width * 0.5),
                 (self.height * 0.5))
-        self.southwest = quad_tree()
+        self.southWest = quad_tree(southWest_boundary)
         
         #SOUTH EAST
         southEast_boundary = boundary(
-                self.centre_x + (self.width * 0.5),
+                self.centre_x - (self.width * 0.5),
                 self.centre_y + (self.height * 0.5),
                 (self.width * 0.5),
                 (self.height * 0.5))
