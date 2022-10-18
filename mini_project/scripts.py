@@ -12,10 +12,11 @@ class star:
 
 class boundary:
     """
-    
+    Boundary rectangle
+
     """
 
-    def __init__(self) -> None:
+    def __init__(self, centre_x, centre_y, width, height):
         """
         
         """
@@ -37,7 +38,34 @@ class quad_tree:
         """
         
         """
-        self.northwest = quad_tree()
-        self.northeast = quad_tree()
+        #NORTH WEST
+        northWest_boundary = boundary(
+                self.centre_x + (self.width * 0.5),
+                self.centre_y + (self.height * 0.5),
+                (self.width * 0.5),
+                (self.height * 0.5))
+        self.northWest = quad_tree(northWest_boundary)
+        
+        #NORTH EAST
+        northEast_boundary = boundary(
+                self.centre_x + (self.width * 0.5),
+                self.centre_y + (self.height * 0.5),
+                (self.width * 0.5),
+                (self.height * 0.5))
+        self.northEast = quad_tree(northEast_boundary)
+
+        #SOUTH WEST
+        southWest_boundary = boundary(
+                self.centre_x + (self.width * 0.5),
+                self.centre_y + (self.height * 0.5),
+                (self.width * 0.5),
+                (self.height * 0.5))
         self.southwest = quad_tree()
-        self.southeast = quad_tree()
+        
+        #SOUTH EAST
+        southEast_boundary = boundary(
+                self.centre_x + (self.width * 0.5),
+                self.centre_y + (self.height * 0.5),
+                (self.width * 0.5),
+                (self.height * 0.5))
+        self.southEast = quad_tree(southEast_boundary)
