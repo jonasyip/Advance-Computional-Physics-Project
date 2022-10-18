@@ -1,9 +1,10 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import numpy.random as random
 import pandas as pd
 
 np.random.seed(100)       #Seed set for reproducibility
+
 
 #x_position, y_position, z_position, Mass
 #1 pc = 3.0856E16 (30856775814913670) meters
