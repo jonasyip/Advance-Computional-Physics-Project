@@ -30,38 +30,43 @@ class cube:
         
         """
         #Boundary cube
-        self.x = centre_x #
-        self.y = centre_y
-        self.z = centre_z
+        self.centre_x = centre_x #
+        self.centre_y = centre_y
+        self.centre_z = centre_z
         self.width = width
         self.height = height
-        self.lenght = length
+        self.length = length
 
 #     def __repr__(self):
         # return '{}: {}'.format(str(self.x, self.y)). repr(self.mass)
         
 
-    def contains(star): #
+    def contains(self, star): #
         """
-        Checks if the star is within the boundary. 
-
+        Checks if the star is within the cube boundary.
+         (cx - width) <= x < (cx + width)
+         (cy - height) <= y < (cy + width)
+         (cz - length) <= z < (cz + length)
 
         Parameters
         ----------
         star : object
-                
-
 
         Returns
         -------
         within_boundary : boolean
 
         """
-        #Contains need to be made in 3D
-        if (star.x > self.centre_x - self.width 
-            and star.x < self.centre_x + self.width
-            and star.y > self.centre_y - self.height
-            and star.y < self.centre_y + self.height): 
+        star_x = star.x
+        star_y = star.y
+        star_z = star.z
+        
+        if (star_x > (self.centre_x - self.width) and
+            star_x < (self.centre_x + self.width) and
+            star_y > (self.centre_y - self.height) and
+            star_y < (self.centre_y + self.height) and
+            star_z > (self.centre_z - self.length) and
+            star_z < (self.centre_z + self.length)): 
             within_boundary = True
         else:
             within_boundary = False
@@ -69,9 +74,12 @@ class cube:
         return within_boundary
                   
 
-class oct_tree:
+#     def draw()
+    
+    
+class octree:
     """
-    Quad tree implentation for Barnes-Hut algorithm
+    Octree implentation for Barnes-Hut algorithm
     """
     def __init__(self, boundary, max_capcity=8):
         """
@@ -80,13 +88,14 @@ class oct_tree:
         self.max_capcity = max_capcity #Maximum children
         self.boundary = boundary
         self.divided = False
+        # self.depth = depth
         self.stars = [] #List of star objects
 
         
     
     def subdivide(self):
         """
-        Sub division creates eight new cubes in the root or in a cube
+        Sub division creates eight new cubes in the root or in existing cube
         
         """
         #Initialise boundary as local variables
@@ -95,14 +104,13 @@ class oct_tree:
         centre_z = self.centre_z        #Boundary z centre (pc)
         width = self.width              #Boundary width (pc)
         height = self.height            #Boundary height (pc)
-        length = self.length            #Boundary lenght (pc)
-
-        #Note to self - 3D
+        length = self.length            #Boundary length (pc)
 
         #Birds eye view of a cube (Looking down on a cube)
-        # You see four quadrants on two layers, top and bottom
+        # You see four quadrants on two layers.
+        # Layer 1: top, layer 2: bottom
 
-        #TOP
+        #----------TOP----------
         #Top north-west boundary
         top_nw_boundary = cube(
             centre_x - (width * 0.5),
@@ -111,6 +119,7 @@ class oct_tree:
             width,
             height,
             length)
+        self.top_nw = octree(top_nw_boundary, self.max_capcity)
         
         #Top north-east boundary
         top_ne_boundary = cube(
@@ -120,7 +129,8 @@ class oct_tree:
             width,
             height,
             length)
-        
+        self.top_ne = octree(top_ne_boundary, self.max_capcity)
+
         #Top south-west boundary
         top_sw_boundary = cube(
             centre_x - (width * 0.5),
@@ -129,7 +139,8 @@ class oct_tree:
             width,
             height,
             length)
-        
+        self.top_sw = octree(top_sw_boundary, self.max_capcity)
+
         #Top south-east boundary
         top_se_boundary = cube(
             centre_x + (width * 0.5),
@@ -138,12 +149,49 @@ class oct_tree:
             width,
             height,
             length)
+        self.top_se = octree(top_se_boundary, self.max_capcity)
 
-
-        #BOTTOM
+        #----------BOTTOM----------
         #Bottom north-west boundary
+        bottom_nw_boundary = cube(
+            centre_x - (width * 0.5),
+            centre_y + (height * 0.5),
+            centre_z - (length * 0.5),
+            width,
+            height,
+            length)
+        self.bottom_nw = octree(bottom_nw_boundary, self.max_capcity)
         
-
+        #Bottom north-east boundary
+        bottom_ne_boundary = cube(
+            centre_x + (width * 0.5),
+            centre_y + (height * 0.5),
+            centre_z - (length * 0.5),
+            width,
+            height,
+            length)
+        self.bottom_ne = octree(bottom_ne_boundary, self.max_capcity)
+        
+        #Bottom south-west boundary
+        bottom_sw_boundary = cube(
+            centre_x - (width * 0.5),
+            centre_y - (height * 0.5),
+            centre_z - (length * 0.5),
+            width,
+            height,
+            length)
+        self.bottom_sw = octree(bottom_sw_boundary, self.max_capcity)
+        
+        #Bottom south-east boundary
+        bottom_se_boundary = cube(
+            centre_x + (width * 0.5),
+            centre_y - (height * 0.5),
+            centre_z - (length * 0.5),
+            width,
+            height,
+            length)
+        self.bottom_se = octree(bottom_se_boundary, self.max_capcity)
+            
         self.divided = True
 
     def insert(self, star):
@@ -153,21 +201,31 @@ class oct_tree:
         If more than one star -> Store as twig node
 
         """
-        if (self.boundary.contains(star) == False): #If star is not contained
-            return 0
+        #Case 1
+        if (self.boundary.contains(star) == False): #If star is not contained within boundary
+            return False
 
-        if (len(self.stars) < self.max_capcity): #If quad is below capacity
+        #Case 2
+        if (len(self.stars) < self.max_capcity): #If cube is below capacity
             self.stars.append(star) #Leaf node
+            return True
+        
+        #Case 3
         else:
             if (self.divided == False): 
                 self.subdivide()
-                self.divided = True
 
             #Return
-            self.northWest.insert(star)
-            self.northEast.insert(star)
-            self.southWest.insert(star)
-            self.southEast.insert(star)
+            return(
+            self.top_nw.insert(star) or
+            self.top_ne.insert(star) or
+            self.top_sw.insert(star) or
+            self.top_se.insert(star) or
+
+            self.bottom_nw.insert(star) or
+            self.bottom_ne.insert(star) or
+            self.bottom_sw.insert(star) or
+            self.bottom_se.insert(star))
 
 
 def setup():
@@ -175,7 +233,7 @@ def setup():
     
     """
     boundary = cube(0)
-    octTree = oct_tree(boundary, 8)
+    octTree = octree(boundary, 8)
 
     for i in range(8):
         s = Point()
