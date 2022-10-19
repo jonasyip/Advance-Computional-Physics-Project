@@ -1,18 +1,25 @@
 # import numpy as np
 
-from calendar import c
-
 
 class star:
     """
     Star object containing the star's (x, y, z) coordinate and mass
     
     """
-    def __init__(self, x, y, z, mass):
+    def __init__(self, x, y, z, mass=None):
         star.x = x          # Star y position, pc
         star.y = y          # Star x position, pc
         star.z = z         # Star z position, pc
         star.mass = mass    # Star mass, M_sun
+
+    def __repr__(self):
+        # rep = 'star(x={}, y={}, z={}, mass={})'.format(self.x, self.y, self.z, self.mass)
+        rep = f"star(x={self.x}, y={self.y}, z={self.z}, mass={self.mass})"
+        return rep
+    
+    def __str__(self):
+        return f"star(x={self.x}, y={self.y}, z={self.z}, mass={self.mass})"
+
 
 class cube:
     #Rename as cube?
@@ -44,7 +51,7 @@ class cube:
     def contains(self, star): #
         """
         Checks if the star is within the cube boundary.
-         (cx - width) <= x < (cx + width)
+         (cx - width)  <= x < (cx + width)
          (cy - height) <= y < (cy + width)
          (cz - length) <= z < (cz + length)
 
@@ -196,9 +203,9 @@ class octree:
 
     def insert(self, star):
         """
-        
-        If one star -> Store as leaf node
-        If more than one star -> Store as twig node
+        Case 1: If no star ->
+        Case 2: If one star -> Store as leaf node
+        Case 3: If more than one star -> Store as twig node
 
         """
         #Case 1
@@ -235,5 +242,3 @@ def setup():
     boundary = cube(0)
     octTree = octree(boundary, 8)
 
-    for i in range(8):
-        s = Point()
