@@ -2,6 +2,9 @@ import numpy as np
 
 
 class star:
+    """
+    Star 
+    """
     def __init__(self, x, y, mass=None):
         self.x = x          # Star y position, pc
         self.y = y          # Star x position, pc
@@ -65,10 +68,10 @@ class square:
         star_y = star.y
 
         
-        if (star_x >= (self.centre_x - self.width) and
-            star_x < (self.centre_x + self.width) and
-            star_y >= (self.centre_y - self.height) and
-            star_y < (self.centre_y + self.height)): 
+        if (star_x >= (self.centre_x - (self.width*0.5)) and
+            star_x < (self.centre_x + (self.width*0.5)) and
+            star_y >= (self.centre_y - (self.height*0.5)) and
+            star_y < (self.centre_y + (self.height*0.5))): 
             within_boundary = True
         else:
             within_boundary = False
@@ -76,7 +79,17 @@ class square:
         return within_boundary
                   
 
-#     def draw()
+    def show(self, ax, c='k', lw=1, **kwargs):
+        x1 = self.centre_x - (self.width*0.5)
+        x2 = self.centre_x + (self.width*0.5)
+        y1 = self.centre_y - (self.height*0.5)
+        y2 = self.centre_y + (self.height*0.5)
+        ax.plot([x1,x2,x2,x1,x1], [y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
+
+
+
+
+
     
     
 class quadtree:
@@ -107,59 +120,57 @@ class quadtree:
         
         """
         #Initialise boundary as local variables
-        centre_x = self.centre_x        #Boundary x centre (pc)
-        centre_y = self.centre_y        #Boundary y centre (pc)
+        centre_x = self.boundary.centre_x        #Boundary x centre (pc)
+        centre_y = self.boundary.centre_y        #Boundary y centre (pc)
 
-        width = self.width              #Boundary width (pc)
-        height = self.height            #Boundary height (pc)
+        width = self.boundary.width              #Boundary width (pc)
+        height = self.boundary.height            #Boundary height (pc)
 
 
-        #Birds eye view of a cube (Looking down on a cube)
-        # You see four quadrants on two layers.
-        # Layer 1: top, layer 2: bottom
+        #Four quadrants
+        # Subdividing -> *0.25
 
         #Quadrants
         #north-west boundary
         nw_boundary = square(
-            centre_x - (width * 0.5),
-            centre_y + (height * 0.5),
-            width,
-            height)
+            centre_x - (width * 0.25),
+            centre_y + (height * 0.25),
+            (width * 0.5),
+            (height * 0.5))
         self.nw = quadtree(nw_boundary, self.max_capcity)
         
         #north-east boundary
         ne_boundary = square(
-            centre_x + (width * 0.5),
-            centre_y + (height * 0.5),
-            width,
-            height)
+            centre_x + (width * 0.25),
+            centre_y + (height * 0.25),
+            (width * 0.5),
+            (height * 0.5))
         self.ne = quadtree(ne_boundary, self.max_capcity)
 
         #south-west boundary
-        sw_boundary = quadtree(
-            centre_x - (width * 0.5),
-            centre_y - (height * 0.5),
-            width,
-            height)
+        sw_boundary = square(
+            centre_x - (width * 0.25),
+            centre_y - (height * 0.25),
+            (width * 0.5),
+            (height * 0.5))
         self.sw = quadtree(sw_boundary, self.max_capcity)
 
         #south-east boundary
         se_boundary = square(
-            centre_x + (width * 0.5),
-            centre_y - (height * 0.5),
-            width,
-            height)
-        self.top_se = quadtree(se_boundary, self.max_capcity)
+            centre_x + (width * 0.25),
+            centre_y - (height * 0.25),
+            (width * 0.5),
+            (height * 0.5))
+        self.se = quadtree(se_boundary, self.max_capcity)
 
-            
         self.divided = True
 
     def insert(self, star):
         """
-        Case 1: If no star ->
+        Case 1: If not within boundary -> Pass
         Case 2: If one star -> Store as leaf node
         Case 3: If more than one star -> Store as twig node
-
+        Case 4: If no star -> Pass
         """
         #Case 1
         if (self.boundary.contains(star) == False): #If star is not contained within boundary
@@ -181,6 +192,16 @@ class quadtree:
             self.ne.insert(star) or
             self.sw.insert(star) or
             self.se.insert(star))
+        
+    def show(self, ax):
+        # square(self.boundary.centre_x, self.boundary.centre_y, self.boundary.width, self.boundary.height)
+        self.boundary.show(ax)
+        if (self.divided == True):
+            self.nw.show(ax)
+            self.ne.show(ax)
+            self.sw.show(ax)
+            self.se.show(ax)
+
 
 
 def setup():

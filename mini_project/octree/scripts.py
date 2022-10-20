@@ -106,12 +106,12 @@ class octree:
         
         """
         #Initialise boundary as local variables
-        centre_x = self.centre_x        #Boundary x centre (pc)
-        centre_y = self.centre_y        #Boundary y centre (pc)
-        centre_z = self.centre_z        #Boundary z centre (pc)
-        width = self.width              #Boundary width (pc)
-        height = self.height            #Boundary height (pc)
-        length = self.length            #Boundary length (pc)
+        centre_x = self.boundary.centre_x        #Boundary x centre (pc)
+        centre_y = self.boundary.centre_y        #Boundary y centre (pc)
+        centre_z = self.boundary.centre_z        #Boundary z centre (pc)
+        width = self.boundary.width              #Boundary width (pc)
+        height = self.boundary.height            #Boundary height (pc)
+        length = self.boundary.length            #Boundary length (pc)
 
         #Birds eye view of a cube (Looking down on a cube)
         # You see four quadrants on two layers.
