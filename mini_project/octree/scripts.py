@@ -7,10 +7,10 @@ class star:
     
     """
     def __init__(self, x, y, z, mass=None):
-        star.x = x          # Star y position, pc
-        star.y = y          # Star x position, pc
-        star.z = z         # Star z position, pc
-        star.mass = mass    # Star mass, M_sun
+        self.x = x          # Star y position, pc
+        self.y = y          # Star x position, pc
+        self.z = z         # Star z position, pc
+        self.mass = mass    # Star mass, M_sun
 
     def __repr__(self):
         # rep = 'star(x={}, y={}, z={}, mass={})'.format(self.x, self.y, self.z, self.mass)

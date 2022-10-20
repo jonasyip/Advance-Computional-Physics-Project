@@ -2,18 +2,14 @@ import numpy as np
 
 
 class star:
-    """
-    Star object containing the star's (x, y) coordinate and mass
-    
-    """
-    def __init__(self, x=0, y=0, mass=None):
-        star.x = x          # Star y position, pc
-        star.y = y          # Star x position, pc
-        star.mass = mass    # Star mass, M_sun
+    def __init__(self, x, y, mass=None):
+        self.x = x          # Star y position, pc
+        self.y = y          # Star x position, pc
+        self.mass = mass    # Star mass, M_sun
 
     def __repr__(self):
-        rep = f"[{self.x}, {self.y}, {self.mass}]"
-        return rep
+        return f"[{self.x}, {self.y}, {self.mass}]"
+       
     
     def array(self):
         array = np.array(f"[{self.x}, {self.y}, {self.mass}]")
