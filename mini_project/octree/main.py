@@ -1,5 +1,5 @@
-from scripts import star, cube, octree
 import numpy as np
+from scripts import cube, octree, star
 
 #taskID
 
