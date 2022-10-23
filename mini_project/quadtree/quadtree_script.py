@@ -23,6 +23,21 @@ class star:
     # def __str__(self):
     #     return f"star(x={self.x}, y={self.y}, mass={self.mass})"
 
+# class node:
+#     """
+    
+#     """
+#     root = 0
+#     branch = 1
+#     leaf = 2
+#     def __init__(self, boundary, stars):
+#         self.star = star
+
+#         if self.parent == None:
+#             self.type = node.root
+#         elif 
+
+
 
 class square:
 
@@ -33,16 +48,26 @@ class square:
 
     """
 
+
     def __init__(self, centre_x, centre_y, width, height): #
         """
 
         
         """
+        #key
+        
+
         #Boundary cube
         self.centre_x = centre_x #
         self.centre_y = centre_y
         self.width = width
         self.height = height
+
+        # self.stars = stars
+        # self.children = []    
+
+        
+        
 
 
     def __repr__(self):
@@ -95,22 +120,24 @@ class square:
 class quadtree:
     """
     Quadtree implentation for Barnes-Hut algorithm
+
+
     """
-    def __init__(self, boundary, max_capcity=4):
+    def __init__(self, boundary, max_capcity=4, level=0):
         """
         
         """
         self.max_capcity = max_capcity #Maximum children
         self.boundary = boundary
         self.divided = False
-        # self.depth = depth
+        self.level = level
         self.stars = [] #List of star objects
     
     def __repr__(self):
-        return f"[{self.boundary}, {self.max_capcity}]"
+        return f"[{self.boundary}, {self.max_capcity}, {self.level}]"
     
     def __str__(self):
-        return f"quadtree(boundary={self.boundary}, max_capcity={self.max_capcity})"
+        return f"quadtree(boundary={self.boundary}, max_capcity={self.max_capcity}, level={self.level})"
 
         
     
@@ -127,7 +154,8 @@ class quadtree:
         height = self.boundary.height            #Boundary height (pc)
 
 
-        #Four quadrants
+        #Children
+        # Four quadrants
         # Subdividing -> *0.25
 
         #Quadrants
@@ -137,7 +165,7 @@ class quadtree:
             centre_y + (height * 0.25),
             (width * 0.5),
             (height * 0.5))
-        self.nw = quadtree(nw_boundary, self.max_capcity)
+        self.nw = quadtree(nw_boundary, self.max_capcity, (self.level+1))
         
         #north-east boundary
         ne_boundary = square(
@@ -145,7 +173,7 @@ class quadtree:
             centre_y + (height * 0.25),
             (width * 0.5),
             (height * 0.5))
-        self.ne = quadtree(ne_boundary, self.max_capcity)
+        self.ne = quadtree(ne_boundary, self.max_capcity, (self.level+1))
 
         #south-west boundary
         sw_boundary = square(
@@ -153,7 +181,7 @@ class quadtree:
             centre_y - (height * 0.25),
             (width * 0.5),
             (height * 0.5))
-        self.sw = quadtree(sw_boundary, self.max_capcity)
+        self.sw = quadtree(sw_boundary, self.max_capcity, (self.level+1))
 
         #south-east boundary
         se_boundary = square(
@@ -161,7 +189,13 @@ class quadtree:
             centre_y - (height * 0.25),
             (width * 0.5),
             (height * 0.5))
-        self.se = quadtree(se_boundary, self.max_capcity)
+        self.se = quadtree(se_boundary, self.max_capcity, (self.level+1))
+
+        print(self.level, self.stars)
+        # print("self.nw.stars %s" % self.nw.stars)
+        # print("self.ne.stars %s" % self.ne.stars)
+        # print("self.sw.stars %s" % self.sw.stars)
+        # print("self.se.stars %s" % self.se.stars)
 
         self.divided = True
 
@@ -171,6 +205,8 @@ class quadtree:
         Case 2: If one star -> Store as leaf node
         Case 3: If more than one star -> Store as twig node
         Case 4: If no star -> Pass
+
+        Recursive
         """
         #Case 1
         if (self.boundary.contains(star) == False): #If star is not contained within boundary
@@ -191,7 +227,8 @@ class quadtree:
             self.nw.insert(star) or
             self.ne.insert(star) or
             self.sw.insert(star) or
-            self.se.insert(star))
+            self.se.insert(star)) #Recusion
+            #LINK WITH NODE CLASS?
         
     def show(self, ax):
         # square(self.boundary.centre_x, self.boundary.centre_y, self.boundary.width, self.boundary.height)
@@ -209,5 +246,5 @@ def setup():
     
     """
     boundary = square(0)
-    octTree = quadtree(boundary, 8)
+    qtree = quadtree(boundary, 8)
 
