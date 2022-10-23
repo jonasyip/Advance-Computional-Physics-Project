@@ -50,7 +50,34 @@ class node:
     def __repr__(self):
         return f"[{self.boundary}, {self.stars}]"
 
+    def contains(self, star): #
+            """
+            Checks if the star is within the cube boundary.
+            (cx - width)  <= x < (cx + width)
+            (cy - height) <= y < (cy + width)
 
+            Parameters
+            ----------
+            star : object
+
+            Returns
+            -------
+            within_boundary : boolean
+
+            """
+            star_x = star.x
+            star_y = star.y
+
+            
+            if (star_x >= (self.centre_x - (self.width*0.5)) and
+                star_x < (self.centre_x + (self.width*0.5)) and
+                star_y >= (self.centre_y - (self.height*0.5)) and
+                star_y < (self.centre_y + (self.height*0.5))): 
+                within_boundary = True
+            else:
+                within_boundary = False
+            
+            return within_boundary
 
 class square:
 
