@@ -64,7 +64,7 @@ class node:
 
         #Quadrants
         #north-west node
-        nw_mode = node(
+        nw_node = node(
             self.cx - (self.width * 0.25),
             self.cy + (self.height * 0.25),
             (self.width * 0.5),
@@ -90,12 +90,27 @@ class node:
             self.cy - (self.height * 0.25),
             (self.width * 0.5),
             (self.height * 0.5))
+        
+        self.children = [nw_node, ne_node, sw_node, se_node]
 
     def insert(self, star):
         if (self.contains(star) == False): #If star is not contained within boundary
             return False
         
         if self.n_stars > 0:
-            a = 1
+            self.createChildren()
+            for child in self.children:
+                child.insert(self.star)
+            self.star = None
+
+        for child in self.children:
+            child.add(star)
+
+
+        else:
+            self.child = child
+
+        
+            
 
 
