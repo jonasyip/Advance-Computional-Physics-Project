@@ -270,7 +270,7 @@ class quadtree:
             self.sw.show(ax)
             self.se.show(ax)
 
-    def search(self, boundary, stars_searched):
+    def search(self, boundary, stars_searched=None):
         """
         
         """
@@ -279,10 +279,10 @@ class quadtree:
                 stars_searched.append(star)
 
         if (self.divided == True): #Recusive
-            self.nw.query(boundary, stars_searched)
-            self.ne.query(boundary, stars_searched)
-            self.se.query(boundary, stars_searched)
-            self.sw.query(boundary, stars_searched)
+            self.nw.search(boundary, stars_searched)
+            self.ne.search(boundary, stars_searched)
+            self.se.search(boundary, stars_searched)
+            self.sw.search(boundary, stars_searched)
         return stars_searched
 
 

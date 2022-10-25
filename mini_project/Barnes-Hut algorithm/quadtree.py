@@ -1,3 +1,4 @@
+
 class particle:
     """
     Star 
@@ -15,8 +16,6 @@ class particle:
         array = np.array(f"[{self.x}, {self.y}, {self.mass}]")
         return array
 
-
-
 class node:
 
     def __init__(self, centre_x, centre_y, width, height): #
@@ -32,6 +31,9 @@ class node:
         self.centre_y = centre_y
         self.width = width
         self.height = height
+        
+    def __repr__(self):
+        return f"[{self.centre_x}, {self.centre_y}, {self.width}, {self.height}]"
 
     def contains(self, star): #
         """
@@ -62,7 +64,12 @@ class node:
         
         return within_boundary
 
-    
+    def show(self, ax, c='k', lw=1, **kwargs):
+        x1 = self.centre_x - (self.width*0.5)
+        x2 = self.centre_x + (self.width*0.5)
+        y1 = self.centre_y - (self.height*0.5)
+        y2 = self.centre_y + (self.height*0.5)
+        ax.plot([x1,x2,x2,x1,x1], [y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
 
 class quadtree:
     """
@@ -77,6 +84,13 @@ class quadtree:
         self.divided = False
         self.level = level
         self.stars = [] #List of star objects
+
+    def __repr__(self):
+        return f"[{self.boundary}, {self.max_capcity}, {self.level}]"
+    
+    def __str__(self):
+        return f"quadtree(boundary={self.boundary}, max_capcity={self.max_capcity}, level={self.level})"
+
 
     def insert(self, star):
         """
@@ -165,3 +179,34 @@ class quadtree:
         self.se = quadtree(se_boundary, self.max_capcity, (self.level+1))
 
         self.divided = True
+        
+    def show(self, ax):
+        """
+        
+        """
+        # square(self.boundary.centre_x, self.boundary.centre_y, self.boundary.width, self.boundary.height)
+        self.boundary.show(ax)
+        if (self.divided == True):
+            self.nw.show(ax)
+            self.ne.show(ax)
+            self.sw.show(ax)
+            self.se.show(ax)
+
+    def search(self, boundary, stars_searched=None):
+        """
+        
+        """
+        if stars_searched is None:
+            stars_searched = []
+
+        for star in self.stars:
+            if boundary.contains(star):
+                data = [boundary, star]
+                stars_searched.append(data)
+
+        if (self.divided == True): #Recusive
+            self.nw.search(boundary, stars_searched)
+            self.ne.search(boundary, stars_searched)
+            self.se.search(boundary, stars_searched)
+            self.sw.search(boundary, stars_searched)
+        return stars_searched

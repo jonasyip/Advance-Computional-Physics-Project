@@ -34,26 +34,26 @@ for coord in coords:
 width = 20
 height = 20
 boundary = square(*[0, 0, width, height])
-capacity = 4
+capacity = 1
 qtree = quadtree(boundary, capacity, 0)
 for i, star in zip(range(100), stars):
     # print(i)
     qtree.insert(star)
-    print(qtree.stars)
+    # print(qtree.stars)
 #     print(qtree.stars)
 # print(len(qtree.stars))
 # print(node)
 
 
 
-# ax = plt.subplot()
+ax = plt.subplot()
 
-# ax.set_xlim(width*-0.5, width*0.5)
-# ax.set_ylim(height*-0.5, height*0.5)
-# qtree.show(ax)
+ax.set_xlim(width*-0.5, width*0.5)
+ax.set_ylim(height*-0.5, height*0.5)
+qtree.show(ax)
 
-# ax.scatter([star.x for star in stars], [star.y for star in stars], s=8)
-# plt.show()
+ax.scatter([star.x for star in stars], [star.y for star in stars], s=8)
+plt.show()
 
 
 
