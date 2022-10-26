@@ -57,7 +57,7 @@ class solarsystem:
             print("System reached maxmimum, body not added")
 
     def update(self, timestep):
-        G_const = 1
+        G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
             a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
@@ -67,9 +67,11 @@ class solarsystem:
                     r2 = np.array([body2.x, body2.y, body2.z])
                     r_diff = r1 - r2
                     a_i = -1*G_const*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
+
                     a_array[count] = a_i
                     count += 1
-            acceleration = np.sum(a_array)
+            acceleration = np.sum(a_array, axis=0)
+
             
             body1.update(timestep, acceleration)
 
