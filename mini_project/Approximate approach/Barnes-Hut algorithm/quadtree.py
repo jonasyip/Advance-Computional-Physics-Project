@@ -10,13 +10,15 @@ class particle:
 
     def __repr__(self):
         return f"[{self.x}, {self.y}, {self.mass}]"
-       
     
-    def array(self):
-        array = np.array(f"[{self.x}, {self.y}, {self.mass}]")
-        return array
+    def __str__(self):
+        return f"particle({self.x}, {self.y}, {self.mass})"
 
 class node:
+
+    mass = None
+    cm = None
+    children = None
 
     def __init__(self, centre_x, centre_y, width, height): #
         """
@@ -31,6 +33,9 @@ class node:
         self.centre_y = centre_y
         self.width = width
         self.height = height
+
+        #Centre of Mass (cm)
+
         
     def __repr__(self):
         return f"[{self.centre_x}, {self.centre_y}, {self.width}, {self.height}]"
@@ -101,6 +106,8 @@ class quadtree:
 
         Recursive
         """
+
+
         #Case 1
         if (self.boundary.contains(star) == False): #If star is not contained within boundary
             return False
@@ -118,6 +125,7 @@ class quadtree:
 
             
             if (self.nw.insert(star) == True):
+                node.insert(self.nw.boundary, star)
                 return True
             elif (self.ne.insert(star) == True):
                 return True
