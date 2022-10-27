@@ -18,7 +18,7 @@ nbody = len(solar_system)
 ssystem = system(nbody) 
 
 for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
-    body_data = body(name, mass, radius, x, y, z, vx, vy, vz)
+    body_data = body(name, mass, x, y, z, vx, vy, vz)
     ssystem.insert(body_data)
 
 ssystem.run(86400, 10, True)

@@ -1,14 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
+import matplotlib.animation as animation
 
 
 class body:
-    def __init__(self, name, mass, radius, x, y, z, vx, vy, vz):
+    def __init__(self, name, mass, x, y, z, vx, vy, vz):
 
         self.name = name            #Name of the body
         self.mass = mass            #Mass of the body   (kg)
-        self.radius = radius        #Radius of the body (km)
 
         self.x = x                  #x position         (km)
         self.y = y                  #y position         (km)
@@ -71,7 +70,8 @@ class system:
     def update(self, timestep):
         # cdef int count
         # cdef double G_const
-        # cdef double[:,:,:] acceleration, a_array
+        # cdef double[:,:,:] acceleration, a_array 
+        # cdef double[:] a_i, r1, r2, r_diff
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
@@ -90,6 +90,10 @@ class system:
             body1.update(timestep, acceleration)
 
     def run(self, timestep, steps, display=False):
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
+        
+        
         for step in range(0, steps):
             self.update(timestep)
             if (display == True):
