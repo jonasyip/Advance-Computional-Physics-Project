@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
 
 class body:
     def __init__(self, name, mass, radius, x, y, z, vx, vy, vz):
@@ -40,7 +43,14 @@ class body:
         self.vy = new_vy
         self.vz = new_vz
 
-class solarsystem:
+    def position(self):
+        return np.array([self.x, self.y, self.z])
+    
+    def draw(self, ax):
+        ax.plot(self.position())
+
+
+class system:
     bodycount = 0
     def __init__(self, nbody):
         self.nbody = nbody
@@ -57,14 +67,16 @@ class solarsystem:
             print("System reached maxmimum, body not added")
 
     def update(self, timestep):
+        # cdef int count
+        # cdef double G_const
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
             a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
             for body2 in self.bodies:
                 if (body1 is not body2):
-                    r1 = np.array([body1.x, body1.y, body1.z])
-                    r2 = np.array([body2.x, body2.y, body2.z])
+                    r1 = body1.position()
+                    r2 = body2.position()
                     r_diff = r1 - r2
                     a_i = -1*G_const*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
 
@@ -72,8 +84,16 @@ class solarsystem:
                     count += 1
             acceleration = np.sum(a_array, axis=0)
 
-            
             body1.update(timestep, acceleration)
+
+    def run(self, timestep, steps):
+        for step in range(0, steps):
+            self.update(timestep)
+
+        
+
+
+
 
     def display(self, ax):
         for body1 in self.bodies:
