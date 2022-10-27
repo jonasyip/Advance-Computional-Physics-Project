@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
+import time
 
 
 class body:
     def __init__(self, name, mass, radius, x, y, z, vx, vy, vz):
-        
+
         self.name = name            #Name of the body
         self.mass = mass            #Mass of the body   (kg)
         self.radius = radius        #Radius of the body (km)
@@ -47,7 +47,9 @@ class body:
         return np.array([self.x, self.y, self.z])
     
     def draw(self, ax):
-        ax.plot(self.position())
+
+        ax.scatter(self.x, self.y, self.z, label=self.name)
+        
 
 
 class system:
@@ -69,10 +71,11 @@ class system:
     def update(self, timestep):
         # cdef int count
         # cdef double G_const
+        # cdef double[:,:,:] acceleration, a_array
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
-            a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
+            a_array = np.zeros(((self.nbody-1), 3), type=np.double)     #Acceleration array (m/s)
             for body2 in self.bodies:
                 if (body1 is not body2):
                     r1 = body1.position()
@@ -82,27 +85,24 @@ class system:
 
                     a_array[count] = a_i
                     count += 1
-            acceleration = np.sum(a_array, axis=0)
+            acceleration = np.sum(a_array, axis=0, type=np.double)
 
             body1.update(timestep, acceleration)
 
-    def run(self, timestep, steps):
+    def run(self, timestep, steps, display=False):
         for step in range(0, steps):
             self.update(timestep)
-
-        
-
-
+            if (display == True):
+                fig = plt.figure()
+                ax = plt.axes(projection = '3d')
+                self.display(ax)
+                save = "%s.png" % step
+                plt.savefig(save)
 
 
     def display(self, ax):
         for body1 in self.bodies:
-            name = body1.name
-            x = body1.x
-            y = body1.y
-            z = body1.z
-
-            ax.scatter(x,y, label=name)
+            body1.draw(ax)
 
 
 

@@ -2,7 +2,7 @@ from solar_system import system, body
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib.animation as animation
+
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal')
@@ -21,7 +21,7 @@ for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
     body_data = body(name, mass, radius, x, y, z, vx, vy, vz)
     ssystem.insert(body_data)
 
-ssystem.run(86400, 10)
+ssystem.run(86400, 10, True)
 
 # steps = 10
 # positions = np.zeros(steps, dtype=object)
