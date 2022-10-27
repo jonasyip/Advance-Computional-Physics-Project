@@ -117,17 +117,3 @@ class system:
 
 
 
-class main:
-    def __init__(self):
-        file_name = r"mini_project\Direct approach\Cython\system.csv"
-        df = pd.read_csv(file_name, header=1)
-        solar_system = np.array(df)
-
-        nbody = len(solar_system)
-        ssystem = system(nbody) 
-
-        for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
-            body_data = body(name, mass, x, y, z, vx, vy, vz)
-            ssystem.insert(body_data)
-
-        ssystem.run(86400, 10, True)

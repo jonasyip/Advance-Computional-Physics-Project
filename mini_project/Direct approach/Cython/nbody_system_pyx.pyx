@@ -10,42 +10,43 @@ cimport matplotlib.animation as animation
 
 cdef class body:
     cdef __init__(self, name, mass, x, y, z, vx, vy, vz):
+        cdef:
+            char self.name = name            #Name of the body
+            double self.mass = mass            #Mass of the body   (kg)
 
-        self.name = name            #Name of the body
-        self.mass = mass            #Mass of the body   (kg)
+            double self.x = x                  #x position         (km)
+            double self.y = y                  #y position         (km)
+            double self.z = z                  #z position         (km)
 
-        self.x = x                  #x position         (km)
-        self.y = y                  #y position         (km)
-        self.z = z                  #z position         (km)
+            double self.vx = vx                #x velocity         (km/s)
+            double self.vy = vy                #y velocity         (km/s)
+            double self.vz = vz                #z velocity         (km/s)
 
-        self.vx = vx                #x velocity         (km/s)
-        self.vy = vy                #y velocity         (km/s)
-        self.vz = vz                #z velocity         (km/s)
-
-    def update(self, timestep, acceleration):
-        self.ax = acceleration[0]
-        self.ay = acceleration[1] 
-        self.az = acceleration[2] 
+    cdef update(self, timestep, acceleration):
+        cdef:
+            double self.ax = acceleration[0]
+            double self.ay = acceleration[1] 
+            double self.az = acceleration[2] 
 
         #v_i_new = v_i + (a_i * t)
-        new_vx = self.vx + (self.ax * timestep)
-        new_vy = self.vy + (self.ay * timestep)
-        new_vz = self.vz + (self.az * timestep)
+            double new_vx = self.vx + (self.ax * timestep)
+            double new_vy = self.vy + (self.ay * timestep)
+            double new_vz = self.vz + (self.az * timestep)
 
         #r_i = r_i + (v_i * t)
-        new_x = self.x + (new_vx * timestep)
-        new_y = self.y + (new_vy * timestep)
-        new_z = self.z + (new_vz * timestep)
+            double new_x = self.x + (new_vx * timestep)
+            double new_y = self.y + (new_vy * timestep)
+            double new_z = self.z + (new_vz * timestep)
 
         #Write new positions
-        self.x = new_x
-        self.y = new_y
-        self.z = new_z
+            double self.x = new_x
+            double self.y = new_y
+            double self.z = new_z
 
         #Write new velocities
-        self.vx = new_vx
-        self.vy = new_vy
-        self.vz = new_vz
+            double self.vx = new_vx
+            double self.vy = new_vy
+            double self.vz = new_vz
 
     def position(self):
         return np.array([self.x, self.y, self.z])
@@ -73,10 +74,11 @@ class system:
             print("System reached maxmimum, body not added")
 
     def update(self, timestep):
-        # cdef int count
-        # cdef double G_const
-        # cdef double[:,:,:] acceleration, a_array 
-        # cdef double[:] a_i, r1, r2, r_diff
+        cdef:
+        int count
+            double G_const
+            double[:,:] acceleration, a_array 
+            double[:] a_i, r1, r2, r_diff
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
@@ -105,6 +107,7 @@ class system:
                 self.display(ax)
                 save = "%s.png" % step
                 plt.savefig(save)
+                
 
 
             
