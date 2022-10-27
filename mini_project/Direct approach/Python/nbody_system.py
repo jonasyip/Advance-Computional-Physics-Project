@@ -1,3 +1,8 @@
+import os
+os.environ["MLK_NUM_THREADS"] = "1" 
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -75,7 +80,7 @@ class system:
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
-            a_array = np.zeros(((self.nbody-1), 3), type=np.double)     #Acceleration array (m/s)
+            a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
             for body2 in self.bodies:
                 if (body1 is not body2):
                     r1 = body1.position()
@@ -85,28 +90,44 @@ class system:
 
                     a_array[count] = a_i
                     count += 1
-            acceleration = np.sum(a_array, axis=0, type=np.double)
+            acceleration = np.sum(a_array, axis=0)
 
             body1.update(timestep, acceleration)
+            
 
     def run(self, timestep, steps, display=False):
-        fig = plt.figure()
-        ax = plt.axes(projection='3d')
-        
-        
+        savepath = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python\figures"
         for step in range(0, steps):
             self.update(timestep)
             if (display == True):
                 fig = plt.figure()
                 ax = plt.axes(projection = '3d')
                 self.display(ax)
-                save = "%s.png" % step
+                save = "%s\%s.png" % (savepath, step)
+
                 plt.savefig(save)
 
 
+        print("done")
+
+
     def display(self, ax):
-        for body1 in self.bodies:
-            body1.draw(ax)
+        for body in self.bodies:
+            body.draw(ax)
 
 
 
+class main:
+    def __init__(self):
+        file_name = r"mini_project\Direct approach\Cython\system.csv"
+        df = pd.read_csv(file_name, header=1)
+        solar_system = np.array(df)
+
+        nbody = len(solar_system)
+        ssystem = system(nbody) 
+
+        for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
+            body_data = body(name, mass, x, y, z, vx, vy, vz)
+            ssystem.insert(body_data)
+
+        ssystem.run(86400, 10, True)

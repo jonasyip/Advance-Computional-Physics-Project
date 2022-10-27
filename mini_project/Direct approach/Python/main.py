@@ -1,16 +1,20 @@
-from solar_system import system, body
+import os
+os.environ["MLK_NUM_THREADS"] = "1" 
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+
+from nbody_system import system, body
 import pandas as pd
-import numpy as np
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal')
 
-def animate(i):
-    global dt, fig
 
-file_name = r"C:\\Users\\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\system.csv"
+
+file_name = r"mini_project\Direct approach\Python\system.csv"
 df = pd.read_csv(file_name, header=1)
 solar_system = np.array(df)
 
