@@ -3,25 +3,20 @@ os.environ["MLK_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
+
+import numpy as np
 cimport numpy as np
-#cimport matplotlib.pyplot as plt
-#cimport matplotlib.animation as animation
+cimport cython
+
 import pandas as pd
 
+np.import_array()
 
 cdef class body:
 
     cdef:
-        char name            #Name of the body
-        double mass            #Mass of the body   (kg)
-
-        double x                  #x position         (km)
-        double y                  #y position         (km)
-        double z                 #z position         (km)
-
-        double vx              #x velocity         (km/s)
-        double vy              #y velocity         (km/s)
-        double vz               #z velocity         (km/s)
+        char name               #Name of the body
+        double mass, x, y, z, vx, vy, vz
 
     def __init__(self, name, mass, x, y, z, vx, vy, vz):
         self.name = name            #Name of the body
@@ -35,11 +30,11 @@ cdef class body:
         self.vy = vy                #y velocity         (km/s)
         self.vz = vz                #z velocity         (km/s)
 
-    cdef update(self, timestep, acceleration):
+    cdef void update(self, int timestep, np.ndarray acceleration):
         cdef:
-            double ax, ay, az
-            double new_vx, new_vy, new_vz
-            double new_x, new_y, new_z
+            double ax, ay, az               #Acceleration       (km/s)
+            double new_vx, new_vy, new_vz   #New velocities     (km/s)
+            double new_x, new_y, new_z      #New positions      (km)
 
         self.ax = acceleration[0]
         self.ay = acceleration[1] 
@@ -65,17 +60,24 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
-    def position(self):
-        return np.array([self.x, self.y, self.z])
+    cdef np.ndarray position(self):
+        cdef np.ndarray pos = np.array([self.x, self.y, self.z])
+        return pos
     
     def draw(self, ax):
-
         ax.scatter(self.x, self.y, self.z, label=self.name)
         
 
 
-class system:
+cdef class system:
+
+    cdef:
+        int bodycount
+        int nbody
+        np.ndarray bodies
+        
     bodycount = 0
+
     def __init__(self, nbody):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=object)
@@ -83,19 +85,18 @@ class system:
     def __repr__(self):
         return f"[]"
 
-    def insert(self, body):
+    cdef void insert(self, body):
         if self.bodycount < self.nbody:
             self.bodies[self.bodycount] = body
             self.bodycount += 1
         else:
             print("System reached maxmimum, body not added")
 
-    def update(self, timestep):
+    cdef void update(self, int timestep):
         cdef:
             int count
             double G_const
-            double[:,:] acceleration, a_array 
-            double[:] a_i, r1, r2, r_diff
+            np.ndarray acceleration, a_array, a_i, r1, r2, r_diff
         G_const = 6.67430E-11
         for body1 in self.bodies:
             count = 0
@@ -138,12 +139,17 @@ class system:
 
 
 def main(timestep, steps):
+    cdef:
+        int nbody
+        char name
+        double mass, radius, x, y, z, vx, vy, vz
+
     file_name = r"mini_project\Direct approach\Cython\system.csv"
     df = pd.read_csv(file_name, header=1)
     solar_system = np.array(df)
 
     nbody = len(solar_system)
-    ssystem = system(nbody) 
+    ssystem = system(nbody)
 
     for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
         body_data = body(name, mass, x, y, z, vx, vy, vz)
