@@ -8,27 +8,27 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
-import pandas as pd
 
 np.import_array()
 
 cdef class body:
 
     cdef:
-        char name               #Name of the body
-        double mass, x, y, z, vx, vy, vz
+        char name               
+        double mass, radius, x, y, z, vx, vy, vz
 
-    def __init__(self, name, mass, x, y, z, vx, vy, vz):
-        self.name = name            #Name of the body
-        self.mass = mass            #Mass of the body   (kg)
+    def __init__(self, n_system):
+        self.name = n_system[0]            #Name of the body
+        self.mass = n_system[1]            #Mass of the body   (kg)
+        self.radius = n_system[2]
 
-        self.x = x                  #x position         (km)
-        self.y = y                  #y position         (km)
-        self.z = z                  #z position         (km)
+        self.x = n_system[3]               #x position         (km)
+        self.y = n_system[4]                 #y position         (km)
+        self.z = n_system[5]                 #z position         (km)
 
-        self.vx = vx                #x velocity         (km/s)
-        self.vy = vy                #y velocity         (km/s)
-        self.vz = vz                #z velocity         (km/s)
+        self.vx = n_system[6]                #x velocity         (km/s)
+        self.vy = n_system[7]                #y velocity         (km/s)
+        self.vz = n_system[8]                #z velocity         (km/s)
 
     cdef void update(self, int timestep, np.ndarray acceleration):
         cdef:
@@ -76,7 +76,7 @@ cdef class system:
         int nbody
         np.ndarray bodies
         
-    bodycount = 0
+    #bodycount = 0
 
     def __init__(self, nbody):
         self.nbody = nbody
@@ -116,8 +116,11 @@ cdef class system:
             
 
     def run(self, timestep, steps, display=False):
-
-        self.update(timestep)
+        cdef:
+            Py_ssize_t i
+        
+        for i in range(steps):
+            self.update(timestep)
         # for step in range(0, steps):
         #     self.update(timestep)
         #     if (display == True):
@@ -140,19 +143,24 @@ cdef class system:
 
 def main(timestep, steps):
     cdef:
+        Py_ssize_t i
         int nbody
-        char name
-        double mass, radius, x, y, z, vx, vy, vz
 
-    file_name = r"mini_project\Direct approach\Cython\system.csv"
-    df = pd.read_csv(file_name, header=1)
-    solar_system = np.array(df)
+    solar_system = np.loadtxt("system.csv", skiprows=2, delimiter=',', dtype=object)
 
-    nbody = len(solar_system)
+    nbody = int(len(solar_system))
     ssystem = system(nbody)
+    print("OK")
 
-    for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
-        body_data = body(name, mass, x, y, z, vx, vy, vz)
-        ssystem.insert(body_data)
+    #for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
+    #    body_data = body(name, mass, radius, x, y, z, vx, vy, vz)
+    #    ssystem.insert(body_data)
+    print("OK2")
+    for i in range(nbody):
+        print("OK %s" % i)
+
+        ssystem.insert(solar_system[i])
+    print("ALL INSERTED")
 
     ssystem.run(timestep, steps, False)
+    print("END")
