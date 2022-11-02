@@ -15,7 +15,7 @@ x = []
 y = []
 z = []
 
-N_size = 100
+N_size = 100000
 
 x = random.random(N_size) #0 to 1
 
@@ -24,11 +24,10 @@ theta = np.arccos(1 - 2*x) #Arccos is used to distribute theta
 phi = random.uniform(0, 2 * np.pi, N_size) #Phi in range of [0, 2*pi] for distrubtion
 
 r = 1E8
-id = range(N_size)
 x_list = (r * np.sin(theta) * np.cos(phi)) 
 y_list = (r * np.sin(theta) * np.sin(phi))
 z_list = (r * np.cos(theta))
-mass_list = np.random.normal(6000, 4, N_size)
+mass_list = np.full(N_size, 6000)
 vx_list = np.zeros(N_size)
 vy_list = np.zeros(N_size)
 vz_list = np.zeros(N_size)

@@ -25,7 +25,7 @@ for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
     body_data = body(name, mass, x, y, z, vx, vy, vz)
     ssystem.insert(body_data)
 
-ssystem.run(86400, 10, True)
+ssystem.run(20000, 10, True)
 
 # steps = 10
 # positions = np.zeros(steps, dtype=object)

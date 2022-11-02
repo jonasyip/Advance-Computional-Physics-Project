@@ -78,6 +78,9 @@ class system:
         # cdef double[:,:,:] acceleration, a_array 
         # cdef double[:] a_i, r1, r2, r_diff
         G_const = 6.67430E-11
+
+        a_to_update = np.zeros(self.nbody, dtype=object)
+        count_j = 0
         for body1 in self.bodies:
             count = 0
             a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
@@ -91,8 +94,11 @@ class system:
                     a_array[count] = a_i
                     count += 1
             acceleration = np.sum(a_array, axis=0)
+            a_to_update[count_j] = acceleration
+            count_j += 1
 
-            body1.update(timestep, acceleration)
+        for body1, accel in zip(self.bodies, a_to_update):
+            body1.update(timestep, accel)
             
 
     def run(self, timestep, steps, display=False):
