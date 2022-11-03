@@ -5,11 +5,12 @@ from matplotlib import animation
 
 def run(timestep, iterations):
     #Constants
-    G_CONST = 6.67430E-20
+    G_CONST = 6.67430E-2
 
     #Load initial system
-    path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python_2_non_oo\system.csv"
+    path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python_2_non_oo\initial_conditions.csv"
     initial_system = np.loadtxt(path, skiprows=2, delimiter=',', dtype=np.float64)
+    initial_system = initial_system[0:10]
     # print(initial_system)
     global total_bodies
     total_bodies = len(initial_system)
@@ -41,17 +42,22 @@ def run(timestep, iterations):
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        print("a_to_update ", a_to_update)
+        # print("a_to_update ", a_to_update)
         # print("nbody_system \n", nbody_system)
         for body1, i, accel in zip(nbody_system, range(total_bodies), a_to_update):
+            # print("body1, i, accel", body1, i, accel)
+            #New velocity
             new_vx = body1[5] + accel[0]*timestep
             new_vy = body1[6] + accel[1]*timestep
             new_vz = body1[7] + accel[2]*timestep
             
+
+            #body
             new_x = body1[2] + (new_vx * timestep)    #new_x = odd_x + (velocity + accel*time)*time
             new_y = body1[3] + (new_vy * timestep)
             new_z = body1[4] + (new_vz * timestep)
 
+            #Update values
             nbody_system[i, 2] = new_x
             nbody_system[i, 3] = new_y
             nbody_system[i, 4] = new_z
@@ -64,46 +70,34 @@ def run(timestep, iterations):
         # print("count_k ", count_k)
         # print("\n nbody_system_w_time ", nbody_system_w_time)
         # print("\n \n \n")
+        print("count_k ", count_k)
+        print(nbody_system)
+        print("\n \n")
         
 
 timestep = 86400
 iterations = 10
 run(timestep, iterations)
 
-# # def animate(i):
-# #     ax.clear()
-# #     system_t = nbody_system_w_time[i]
-# #     # print(system_t)
-# #     # graph.set_array = (system_t[:, 2] , system_t[:, 3], system_t[:, 4])
-# #     ax.title('Time={} s'.format(i*timestep))
-# #     ax.set_data(system_t[:, 2] , system_t[:, 3], system_t[:, 4])
-
 # def animate(i):
-#     for k in range(total_bodies):
-#         stars[k].set_data(stars[k][:,0][i], stars[k][:,1][i])
-#         stars[k].set_3d_properties(stars[k][:,2][i])
-
-#         trajectories[k].set_data(stars[k][:,0][:i+1],stars[k][:,1][:i+1])   
-#         trajectories[k].set_3d_properties(stars[k][:,2][:i+1])
-#     return np.concatenate([stars, trajectories])
-
-# fig = plt.figure()
-# ax = fig.add_subplot(projection = '3d')
-# # ax.set_xlim((-5E25, 5E25))
-# # ax.set_ylim((-5E25, 5E25))
-# # ax.set_zlim((-5E25, 5E25))
-
-# stars = np.array([plt.plot([],[],[]) for k in range(total_bodies)])
-# trajectories = np.array([plt.plot([],[], [])[0] for k in range(total_bodies)])
+#     ax.clear()
+#     system_t = nbody_system_w_time[i]
+#     # print(system_t)
+#     # graph.set_array = (system_t[:, 2] , system_t[:, 3], system_t[:, 4])
+#     ax.title('Time={} s'.format(i*timestep))
+#     ax.set_data(system_t[:, 2] , system_t[:, 3], system_t[:, 4])
 
 
 
-# frames_t = iterations-1
-# system_t = nbody_system_w_time[0]
-# ax.scatter(system_t[:, 2] , system_t[:, 3], system_t[:, 4])
-# ani = animation.FuncAnimation(fig, animate, interval=200, frames=frames_t, blit=False)
+fig = plt.figure()
+ax = fig.add_subplot(projection = '3d')
+# ax.set_xlim((-5E25, 5E25))
+# ax.set_ylim((-5E25, 5E25))
+# ax.set_zlim((-5E25, 5E25))
 
-# plt.show()
+
+
+plt.show()
 print("\n nbody_system_w_time", nbody_system_w_time)
 system_t = nbody_system_w_time[2]
 print(system_t)
@@ -116,13 +110,9 @@ for system_t, i in zip(nbody_system_w_time, range(len(nbody_system_w_time))):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     title = ax.set_title('{}'.format(i*timestep))
-    # ax.set_xlim((-5E9, 5E9))
-    # ax.set_ylim((-5E9, 5E9))
-    # ax.set_zlim((-5E9, 5E9))
-
-
     system_t = nbody_system_w_time[i]
-    ax.scatter(system_t[:, 2] , system_t[:, 3], system_t[:, 4])
+    for part in system_t:
+        ax.scatter(part[2] , part[3], part[4])
     save = "%s\%s.png" % (savepath, i)
     plt.savefig(save)
     plt.close()
