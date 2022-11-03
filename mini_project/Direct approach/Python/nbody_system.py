@@ -97,6 +97,8 @@ class system:
             a_to_update[count_j] = acceleration
             count_j += 1
 
+        print(a_to_update)
+
         for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
             
