@@ -66,14 +66,17 @@ cdef class body:
 
 
 cdef class system:
-    
     cdef np.ndarray bodies
     cdef int nbody, bodycount
+    cdef public np.ndarray system_frames
+    cdef public int frame_count
     
-    def __init__(self, nbody):
+    def __init__(self, nbody, steps):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=object)
         self.bodycount = 0
+        self.system_frames = np.zeros(steps+1, dtype=object)
+        self.frame_count = 1
 
     def __repr__(self):
         return f"[]"
@@ -86,11 +89,12 @@ cdef class system:
             print("System reached maxmimum, body not added")
 
     cpdef update(self, double timestep):
-        # cdef int count
-        # cdef double G_const
-        # cdef double[:,:,:] acceleration, a_array 
-        # cdef double[:] a_i, r1, r2, r_diff
-        G_const = 6.67430E-11
+        cdef double G_CONST
+        cdef np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
+        cdef int count, count_j
+
+
+        G_CONST = 6.67430E-11
 
         a_to_update = np.zeros(self.nbody, dtype=object)
         count_j = 0
@@ -102,51 +106,42 @@ cdef class system:
                     r1 = body1.position()
                     r2 = body2.position()
                     r_diff = r1 - r2
-                    a_i = -1*G_const*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
+                    a_i = -1*G_CONST*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
 
                     a_array[count] = a_i
                     count += 1
-            acceleration = np.sum(a_array, axis=0)
+            acceleration = np.sum(a_array, axis=0, dtype=np.float64)
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        print(a_to_update)
-
         for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
-            
+        self.system_frames[self.frame_count] = self.bodies
+        self.frame_count += 1
+
+
 
     def run(self, timestep, steps, display=False):
-        savepath = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2\initial_conditions.csv"
+        path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
+        savename = "frames.npy"
+        savepath = "%s\%s" % (path, savename)
+        self.system_frames[0] = self.bodies
         for step in range(0, steps):
             self.update(timestep)
-            #if (display == True):
-            #    fig = plt.figure()
-            #    ax = plt.axes(projection = '3d')
-            #    self.display(ax)
-            #    save = "%s\%s.png" % (savepath, step)
 
-            #    plt.savefig(save)
-
-
+        np.save(savepath, self.system_frames)
         print("done")
 
 
-    def display(self, ax):
-        for body in self.bodies:
-            body.draw(ax)
-
-
-
-def main(timestep, steps):
+def main(timestep, steps, nbodies=10):
     cdef:
         Py_ssize_t i
         int nbody
 
-    solar_system = np.loadtxt("initial_conditions.csv", skiprows=2, delimiter=',', dtype=np.float64)
-    solar_system = solar_system[0:10]
-    nbody = int(len(solar_system))
-    ssystem = system(nbody)
+    initial = np.loadtxt("initial_conditions.csv", skiprows=2, delimiter=',', dtype=np.float64)
+    initial = initial[0:nbodies]
+    nbody = int(len(initial))
+    nbody_system = system(nbody, steps)
     print("OK")
 
     #for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
@@ -155,9 +150,9 @@ def main(timestep, steps):
     print("OK2")
     for i in range(nbody):
         print("OK %s" % i)
-        body_data = body(*solar_system[i])
-        ssystem.insert(body_data)
+        body_data = body(*initial[i])
+        nbody_system.insert(body_data)
     print("ALL INSERTED")
 
-    ssystem.run(timestep, steps, False)
+    nbody_system.run(timestep, steps, False)
     print("END")
