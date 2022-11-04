@@ -10,34 +10,39 @@ filepath = "%s\%s" % (path, filename)
 frames = np.load(filepath, allow_pickle=True)
 total_frames = len(frames)
 
-def animate(i):
-    snapshot = frames[i]
-    x = []
-    y = []
-    z = []
-    for body in snapshot:
-        x.append(body.x)
-        y.append(body.y)
-        z.append(body.z)
-    graph._offsets3d = (x, y, z)
-    title.set_text('time={}'.format(i))
+for frame1 in frames:
+    for frame2 in frames:
+        if (frame1 is frame2):
+            print("true")
+
+# def animate(i):
+#     snapshot = frames[i]
+#     x = []
+#     y = []
+#     z = []
+#     for body in snapshot:
+#         x.append(body.x)
+#         y.append(body.y)
+#         z.append(body.z)
+#     graph._offsets3d = (x, y, z)
+#     title.set_text('time={}'.format(i))
 
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
 
-snapshot0 = frames[0]
-x = []
-y = []
-z = []
-for body1 in snapshot0:
-    x.append(body1.x)
-    y.append(body1.y)
-    z.append(body1.z)
-graph = ax.scatter(x, y, z)
+# snapshot0 = frames[0]
+# x = []
+# y = []
+# z = []
+# for body1 in snapshot0:
+#     x.append(body1.x)
+#     y.append(body1.y)
+#     z.append(body1.z)
+# graph = ax.scatter(x, y, z)
 
-title = ax.set_title('time=0')
+# title = ax.set_title('time=0')
 
-ani = matplotlib.animation.FuncAnimation(fig, animate, (total_frames-1), interval=200, blit=False)
-plt.show()
+# ani = matplotlib.animation.FuncAnimation(fig, animate, (total_frames-1), interval=200, blit=False)
+# plt.show()

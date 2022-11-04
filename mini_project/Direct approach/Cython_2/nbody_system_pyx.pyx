@@ -114,7 +114,7 @@ cdef class system:
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        for body1, accel in zip(self.bodies, a_to_update):
+        for count, body1, accel in zip(self.nbody, self.bodies, a_to_update):
             body1.update(timestep, accel)
         self.system_frames[self.frame_count] = self.bodies
         self.frame_count += 1

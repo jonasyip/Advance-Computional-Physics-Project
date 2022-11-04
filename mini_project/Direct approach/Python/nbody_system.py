@@ -7,6 +7,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+class frames:
+    def __init__(self, total_frames):
+        self.total_frames = total_frames
+        self.system_frames = np.zeros(total_frames, dtype=object)
+        self.frame_count = 0
+
+    def insert(self, frame):
+        """
+        Inserts a snapshot of the nbody system (system object).
+
+        Parameters
+        ----------
+        frame : system
+            System object
+
+        """
+        length = len(frame) 
+        star_data = np.zeros(length, dtype=object)
+        for i, star in zip(range(length), frame):
+            data = np.array([star.name, star.mass, star.x, star.y, star.z, star.vx, star.vy, star.vz])
+            star_data[i] = data
+
+        self.system_frames[self.frame_count] = star_data
+        self.frame_count += 1
+    
+    def save(self):
+        """
+        Saves all the system frames as a .npy
+        """
+        path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python"
+        savename = "frames.npy"
+        savepath = "%s\%s" % (path, savename)
+        np.save(savepath, self.system_frames)
+
 
 class body:
     def __init__(self, name, mass, x, y, z, vx, vy, vz):
@@ -23,6 +57,18 @@ class body:
         self.vz = vz                #z velocity         (km/s)
 
     def update(self, timestep, acceleration):
+        """
+        Updates the body position and velocity
+
+        Parameters
+        ----------
+        timestep : float
+            Time step
+
+        acceleration : ndarray
+            Acceleration
+
+        """
         self.ax = acceleration[0]
         self.ay = acceleration[1] 
         self.az = acceleration[2] 
@@ -48,6 +94,14 @@ class body:
         self.vz = new_vz
 
     def position(self):
+        """
+        Returns the position of the body
+
+        Returns
+        -------
+        position : ndarray
+            Position of the body
+        """
         return np.array([self.x, self.y, self.z])
     
     def draw(self, ax):
@@ -57,15 +111,21 @@ class body:
 
 
 class system:
-    bodycount = 0
-    def __init__(self, nbody):
+
+    def __init__(self, nbody, steps):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=object)
-
-    def __repr__(self):
-        return f"[]"
+        self.bodycount = 0
 
     def insert(self, body):
+        """
+        Inserts a body the nbody system
+
+        Parameters
+        ----------
+        body : body
+            Body object
+        """
         if self.bodycount < self.nbody:
             self.bodies[self.bodycount] = body
             self.bodycount += 1
@@ -73,11 +133,16 @@ class system:
             print("System reached maxmimum, body not added")
 
     def update(self, timestep):
-        # cdef int count
-        # cdef double G_const
-        # cdef double[:,:,:] acceleration, a_array 
-        # cdef double[:] a_i, r1, r2, r_diff
-        G_const = 6.67430E-11
+        """
+        Updates the nbody system by t timestep
+
+        Parameters
+        ----------
+        timestep : float
+    
+
+        """
+        G_CONST = 6.67430E-11
 
         a_to_update = np.zeros(self.nbody, dtype=object)
         count_j = 0
@@ -89,7 +154,7 @@ class system:
                     r1 = body1.position()
                     r2 = body2.position()
                     r_diff = r1 - r2
-                    a_i = -1*G_const*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
+                    a_i = -1*G_CONST*((body2.mass) / np.power(r_diff, 2))
 
                     a_array[count] = a_i
                     count += 1
@@ -97,26 +162,28 @@ class system:
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        print(a_to_update)
-
         for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
-            
+
+        self.sframes.insert(self.bodies)
 
     def run(self, timestep, steps, display=False):
+        
         savepath = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python\figures"
+        self.sframes = frames(steps+1)
+        self.sframes.insert(self.bodies)
+
         for step in range(0, steps):
             self.update(timestep)
             if (display == True):
                 fig = plt.figure()
                 ax = plt.axes(projection = '3d')
                 self.display(ax)
-                save = "%s\%s.png" % (savepath, step)
+                save1 = "%s\%s.png" % (savepath, step)
+                plt.savefig(save1)
 
-                plt.savefig(save)
+        self.sframes.save()
 
-
-        print("done")
 
 
     def display(self, ax):

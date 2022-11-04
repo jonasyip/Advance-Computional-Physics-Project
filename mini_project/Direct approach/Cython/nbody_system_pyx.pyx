@@ -74,32 +74,35 @@ cdef class system:
     cdef:
         int bodycount
         int nbody
-        object[:] bodies
+        body[:] bodies
 
     def __init__(self, nbody):
         self.bodycount = 0
         self.nbody = nbody
-        self.bodies = np.zeros(nbody, dtype=object)
+        self.bodies = np.zeros(nbody, dtype=body)
 
     def __repr__(self):
         return f"[]"
 
-    cdef void insert(self, object body):
+    cdef void insert(self, object body1):
         if self.bodycount < self.nbody:
-            self.bodies[self.bodycount] = body
+            self.bodies[self.bodycount] = body1
             self.bodycount += 1
         else:
             print("System reached maxmimum, body not added")
 
     cdef void update(self, int timestep):
         cdef:
-            int count
+            int count, count_j
             double G_const
-            np.ndarray acceleration, a_array, a_i, r1, r2, r_diff
+            np.ndarray acceleration, a_array, a_i, r1, r2, r_diff, a_to_update
 
         print("update(self, int %s)" % timestep)
         
         G_const = 6.67430E-11
+
+        a_to_update = np.zeros(self.nbody, dtype=object)
+        count_j = 0
         for body1 in self.bodies:
             count = 0
             a_array = np.zeros(((self.nbody-1), 3), dtype=object)     #Acceleration array (m/s)
@@ -109,17 +112,22 @@ cdef class system:
 
                     r1 = np.array([body1[3], body1[4], body1[5]])
                     r2 = np.array([body2[3], body2[4], body2[5]])
-                    print("r1 r2")
+                    #print("r1 r2")
                     r_diff = np.array([body1[3]-body2[3], body1[4]-body2[4], body1[5]-body2[5]])
-                    print("r_diff %s " % r_diff)
+                    #print("r_diff %s " % r_diff)
                     a_i = -1*G_const*((body2[1]*r_diff) / np.power(np.absolute(r_diff), 3))
 
                     a_array[count] = a_i
                     count += 1
             acceleration = np.sum(a_array, axis=0, dtype=np.double)
+            a_to_update[count_j] = acceleration
+            count_j += 1
 
-            body1.update(timestep, acceleration)
-            print("body1.update works")
+        print("updating....")
+        print(type(self.bodies))
+        for body1, accel in zip(self.bodies, a_to_update):
+            body1.update(timestep, accel)
+        print("body1.update works")
             
 
     def run(self, timestep, steps, display=False):

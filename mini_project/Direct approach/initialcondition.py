@@ -28,9 +28,9 @@ x_list = (r * np.sin(theta) * np.cos(phi))
 y_list = (r * np.sin(theta) * np.sin(phi))
 z_list = (r * np.cos(theta))
 mass_list = np.full(N_size, 1E23)
-vx_list = np.zeros(N_size)
-vy_list = np.zeros(N_size)
-vz_list = np.zeros(N_size)
+vx_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
+vy_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
+vz_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
 
 
 data = {
