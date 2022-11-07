@@ -23,7 +23,7 @@ cdef class frames:
         self.system_frames = np.zeros(total_frames, dtype=object)
         self.frame_count = 0
 
-    cpdef insert(self, object frame):
+    cpdef void insert(self, object frame):
         cdef:
             int length
             np.ndarray star_data, data
@@ -40,10 +40,9 @@ cdef class frames:
         self.frame_count += 1
         #print("inserted")
     
-    cpdef save(self):
+    cpdef void save(self):
         cdef:
             str path, savename, savepath
-
 
         path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
         savename = "frames_pyx.npy"
@@ -68,7 +67,7 @@ cdef class body:
         self.vy = vy                #y velocity         (km/s)
         self.vz = vz                #z velocity         (km/s)
     
-    cpdef update(self, double timestep, np.ndarray acceleration):
+    cpdef void update(self, double timestep, np.ndarray acceleration):
         cdef:
             double ax, ay, az               #Acceleration
             double new_vx, new_vy, new_vz   #New velocites
@@ -98,9 +97,9 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
-    cpdef position(self):
-        cdef:
-            np.ndarray pos 
+    cpdef np.ndarray position(self):
+        cdef np.ndarray pos
+
         pos = np.array([self.x, self.y, self.z])
         return pos
 
@@ -117,17 +116,14 @@ cdef class n_system:
         self.bodies = np.zeros(nbody, dtype=body)
         self.bodycount = 0
 
-    def __repr__(self):
-        return f"[]"
-
-    cpdef insert(self, body body):
+    cpdef void insert(self, body body):
         if self.bodycount < self.nbody:
             self.bodies[self.bodycount] = body
             self.bodycount += 1
         else:
             print("System reached maxmimum, body not added")
 
-    cpdef update(self, double timestep):
+    cpdef void update(self, double timestep):
         cdef:
             double G_CONST
             np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
