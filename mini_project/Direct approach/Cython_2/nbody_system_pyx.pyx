@@ -9,7 +9,48 @@ cimport numpy as np
 cimport cython
 
 
+
 np.import_array()
+
+cdef class frames:
+    cdef:
+        int total_frames
+        public np.ndarray system_frames
+        public int frame_count
+
+    def __init__(self, total_frames):
+        self.total_frames = total_frames
+        self.system_frames = np.zeros(total_frames, dtype=object)
+        self.frame_count = 0
+
+    cpdef insert(self, object frame):
+        cdef:
+            int length
+            np.ndarray star_data, data
+            Py_ssize_t i
+            body star
+
+        length = len(frame)
+        star_data = np.zeros(length, dtype=object)
+        for i, star in zip(range(length), frame):
+            data = np.array([star.name, star.mass, star.x, star.y, star.z, star.vx, star.vy, star.vz])
+            star_data[i] = data
+
+        self.system_frames[self.frame_count] = star_data
+        self.frame_count += 1
+        #print("inserted")
+    
+    cpdef save(self):
+        cdef:
+            str path, savename, savepath
+
+
+        path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
+        savename = "frames_pyx.npy"
+        savepath = "%s\%s" % (path, savename)
+        np.save(savepath, self.system_frames)
+
+
 
 cdef class body:
     cdef public double name, mass, x, y, z, vx, vy, vz
@@ -28,9 +69,10 @@ cdef class body:
         self.vz = vz                #z velocity         (km/s)
     
     cpdef update(self, double timestep, np.ndarray acceleration):
-        cdef double ax, ay, az
-        cdef double new_vx, new_vy, new_vz, 
-        cdef double new_x, new_y, new_z
+        cdef:
+            double ax, ay, az               #Acceleration
+            double new_vx, new_vy, new_vz   #New velocites
+            double new_x, new_y, new_z      #New positions
 
         ax = acceleration[0]
         ay = acceleration[1] 
@@ -57,31 +99,28 @@ cdef class body:
         self.vz = new_vz
 
     cpdef position(self):
-        return np.array([self.x, self.y, self.z])
-    
-    def draw(self, ax):
-
-        ax.scatter(self.x, self.y, self.z, label=self.name)
-        
+        cdef:
+            np.ndarray pos 
+        pos = np.array([self.x, self.y, self.z])
+        return pos
 
 
-cdef class system:
-    cdef np.ndarray bodies
-    cdef int nbody, bodycount
-    cdef public np.ndarray system_frames
-    cdef public int frame_count
-    
+cdef class n_system:
+    cdef:
+        np.ndarray bodies
+        int nbody, bodycount
+        public object sframes
+
+
     def __init__(self, nbody, steps):
         self.nbody = nbody
-        self.bodies = np.zeros(nbody, dtype=object)
+        self.bodies = np.zeros(nbody, dtype=body)
         self.bodycount = 0
-        self.system_frames = np.zeros(steps+1, dtype=object)
-        self.frame_count = 1
 
     def __repr__(self):
         return f"[]"
 
-    cdef insert(self, body):
+    cpdef insert(self, body body):
         if self.bodycount < self.nbody:
             self.bodies[self.bodycount] = body
             self.bodycount += 1
@@ -89,9 +128,10 @@ cdef class system:
             print("System reached maxmimum, body not added")
 
     cpdef update(self, double timestep):
-        cdef double G_CONST
-        cdef np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
-        cdef int count, count_j
+        cdef:
+            double G_CONST
+            np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
+            int count, count_j
 
 
         G_CONST = 6.67430E-11
@@ -114,34 +154,35 @@ cdef class system:
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        for count, body1, accel in zip(self.nbody, self.bodies, a_to_update):
+        for count, body1, accel in zip(range(self.nbody), self.bodies, a_to_update):
             body1.update(timestep, accel)
-        self.system_frames[self.frame_count] = self.bodies
-        self.frame_count += 1
 
+        self.sframes.insert(self.bodies)
 
 
     def run(self, timestep, steps, display=False):
-        path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
-        savename = "frames.npy"
-        savepath = "%s\%s" % (path, savename)
-        self.system_frames[0] = self.bodies
+        
+        self.sframes = frames(steps+1)
+        self.sframes.insert(self.bodies)
         for step in range(0, steps):
             self.update(timestep)
 
-        np.save(savepath, self.system_frames)
-        print("done")
+        self.sframes.save()
+
 
 
 def main(timestep, steps, nbodies=10):
     cdef:
         Py_ssize_t i
         int nbody
+        n_system nbody_system
+        body body_data
+        np.ndarray initial
 
     initial = np.loadtxt("initial_conditions.csv", skiprows=2, delimiter=',', dtype=np.float64)
     initial = initial[0:nbodies]
     nbody = int(len(initial))
-    nbody_system = system(nbody, steps)
+    nbody_system = n_system(nbody, steps)
     print("OK")
 
     #for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
