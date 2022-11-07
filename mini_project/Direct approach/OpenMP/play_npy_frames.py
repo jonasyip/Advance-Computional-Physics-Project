@@ -1,14 +1,15 @@
 import numpy as np
-from nbody_system import system, body
+# from nbody_system import system, body
 from matplotlib import pyplot as plt
 import matplotlib.animation
 
-path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python"
-filename = "frames.npy"
+path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
+filename = "frames_pyx.npy"
 filepath = "%s\%s" % (path, filename)
 
 frames = np.load(filepath, allow_pickle=True)
 total_frames = len(frames)
+
 
 def animate(i):
     snapshot = frames[i]
