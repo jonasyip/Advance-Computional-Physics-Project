@@ -3,7 +3,7 @@ os.environ["MLK_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
-
+import time
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -38,7 +38,6 @@ cdef class frames:
 
         self.system_frames[self.frame_count] = star_data
         self.frame_count += 1
-        #print("inserted")
     
     cpdef void save(self):
         cdef:
@@ -59,13 +58,13 @@ cdef class body:
         self.name = name            #Name of the body
         self.mass = mass            #Mass of the body   (kg)
 
-        self.x = x                  #x position         (km)
-        self.y = y                  #y position         (km)
-        self.z = z                  #z position         (km)
+        self.x = x                  #x position         (m)
+        self.y = y                  #y position         (m)
+        self.z = z                  #z position         (m)
 
-        self.vx = vx                #x velocity         (km/s)
-        self.vy = vy                #y velocity         (km/s)
-        self.vz = vz                #z velocity         (km/s)
+        self.vx = vx                #x velocity         (m/s)
+        self.vy = vy                #y velocity         (m/s)
+        self.vz = vz                #z velocity         (m/s)
     
     cpdef void update(self, double timestep, np.ndarray acceleration):
         cdef:
@@ -108,13 +107,16 @@ cdef class n_system:
     cdef:
         np.ndarray bodies
         int nbody, bodycount
-        public object sframes
+        public frames sframes
+        public double G_CONST
 
 
     def __init__(self, nbody, steps):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=body)
         self.bodycount = 0
+
+        self.G_CONST = 6.67430E-11
 
     cpdef void insert(self, body body):
         if self.bodycount < self.nbody:
@@ -125,12 +127,12 @@ cdef class n_system:
 
     cpdef void update(self, double timestep):
         cdef:
-            double G_CONST
+            
             np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
             int count, count_j
 
 
-        G_CONST = 6.67430E-11
+        
 
         a_to_update = np.zeros(self.nbody, dtype=object)
         count_j = 0
@@ -142,7 +144,7 @@ cdef class n_system:
                     r1 = body1.position()
                     r2 = body2.position()
                     r_diff = r1 - r2
-                    a_i = -1*G_CONST*((body2.mass*r_diff) / np.power(np.absolute(r_diff), 3))
+                    a_i = -1*self.G_CONST*((body2.mass) / np.power(r_diff, 2))
 
                     a_array[count] = a_i
                     count += 1
@@ -150,13 +152,14 @@ cdef class n_system:
             a_to_update[count_j] = acceleration
             count_j += 1
 
-        for count, body1, accel in zip(range(self.nbody), self.bodies, a_to_update):
+        for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
 
         self.sframes.insert(self.bodies)
 
 
-    def run(self, timestep, steps, display=False):
+    cdef run(self, double timestep, int steps):
+        cdef Py_ssize_t step
         
         self.sframes = frames(steps+1)
         self.sframes.insert(self.bodies)
@@ -181,15 +184,11 @@ def main(timestep, steps, nbodies=10):
     nbody_system = n_system(nbody, steps)
     print("OK")
 
-    #for name, mass, radius, x, y, z, vx, vy, vz in solar_system:
-    #    body_data = body(name, mass, radius, x, y, z, vx, vy, vz)
-    #    ssystem.insert(body_data)
-    print("OK2")
     for i in range(nbody):
         print("OK %s" % i)
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
     print("ALL INSERTED")
 
-    nbody_system.run(timestep, steps, False)
+    nbody_system.run(timestep, steps)
     print("END")
