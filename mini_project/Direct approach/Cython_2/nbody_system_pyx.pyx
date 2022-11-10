@@ -185,10 +185,10 @@ def main(timestep, steps, nbodies=10):
     print("OK")
 
     for i in range(nbody):
-        print("OK %s" % i)
+        #print("OK %s" % i)
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
-    print("ALL INSERTED")
+    #print("ALL INSERTED")
 
     nbody_system.run(timestep, steps)
     print("END")

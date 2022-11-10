@@ -11,11 +11,11 @@ import numpy as np
 
 
 ext_modules=[
-    Extension("nbody_system_pyx", ["nbody_system_pyx.pyx"],
+    Extension("openmp_nbody_system_pyx", ["openmp_nbody_system_pyx.pyx"],
             include_dirs=[np.get_include()],
             extra_compile_args=['-fopenmp'],
             extra_link_args=['-fopenmp']),
 ]
 
-setup(name="nbody_system_pyx",
+setup(name="openmp_nbody_system_pyx",
       ext_modules=cythonize(ext_modules))

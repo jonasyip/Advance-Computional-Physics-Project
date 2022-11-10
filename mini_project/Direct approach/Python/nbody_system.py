@@ -147,17 +147,15 @@ class system:
         count_j = 0
         for body1 in self.bodies:
             count = 0
-            a_array = np.zeros(((self.nbody-1), 3))     #Acceleration array (m/s)
+            acceleration = np.zeros(3, dtype=np.float64)     #Acceleration array (m/s)
             for body2 in self.bodies:
                 if (body1 is not body2):
                     r1 = body1.position()
                     r2 = body2.position()
                     r_diff = r1 - r2
-                    a_i = -1*G_CONST*((body2.mass) / np.power(r_diff, 2))
-
-                    a_array[count] = a_i
+                    a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
+                    acceleration = np.add(acceleration, a_i)
                     count += 1
-            acceleration = np.sum(a_array, axis=0)
             a_to_update[count_j] = acceleration
             count_j += 1
 

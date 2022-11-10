@@ -3,11 +3,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.animation
 
-path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Cython_2"
-filename = "frames_pyx.npy"
+path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\OpenMP"
+filename = "omp_frames_pyx.npy"
 filepath = "%s\%s" % (path, filename)
 
-frames = np.load(filepath, allow_pickle=True)
+frames = np.load(filename, allow_pickle=True)
 total_frames = len(frames)
 
 
@@ -27,9 +27,9 @@ def animate(i):
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.set_xlim((-1E14, 1E14))
-ax.set_ylim((-1E14, 1E14))
-ax.set_zlim((-1E14, 1E14))
+ax.set_xlim((-1E10, 1E10))
+ax.set_ylim((-1E10, 1E10))
+ax.set_zlim((-1E10, 1E10))
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")

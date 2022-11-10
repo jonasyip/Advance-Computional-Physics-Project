@@ -23,15 +23,17 @@ theta = np.arccos(1 - 2*x) #Arccos is used to distribute theta
 
 phi = random.uniform(0, 2 * np.pi, N_size) #Phi in range of [0, 2*pi] for distrubtion
 
-r = 1E8
+r = 1E10
 x_list = (r * np.sin(theta) * np.cos(phi)) 
 y_list = (r * np.sin(theta) * np.sin(phi))
 z_list = (r * np.cos(theta))
-mass_list = np.full(N_size, 1E23)
-vx_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
-vy_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
-vz_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
-
+mass_list = np.random.normal(loc=1E23, scale=1E22, size=N_size)
+# vx_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
+# vy_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
+# vz_list = np.random.normal(loc=0.0, scale=1000.0, size=N_size)
+vx_list = np.full(N_size, 0)
+vy_list = np.full(N_size, 0)
+vz_list = np.full(N_size, 0)
 
 data = {
     "Mass" : mass_list,

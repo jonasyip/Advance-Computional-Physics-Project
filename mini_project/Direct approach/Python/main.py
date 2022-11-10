@@ -12,12 +12,13 @@ import time
 start_time = time.time()
 file_name = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python\initial_conditions.csv"
 df = pd.read_csv(file_name, header=1)
-nbody_system = np.array(df)[0:10]
+nbody_system = np.array(df)[0:20]
+
 
 nbody = len(nbody_system)
 
-steps = 100
-timestep = 86400
+steps = 200
+timestep = 1.037e+6
 
 ssystem = system(nbody, steps) 
 
