@@ -7,7 +7,7 @@ path = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Co
 filename = "omp_frames_pyx.npy"
 filepath = "%s\%s" % (path, filename)
 
-frames = np.load(filename, allow_pickle=True)
+frames = np.load(filepath, allow_pickle=True)
 total_frames = len(frames)
 
 

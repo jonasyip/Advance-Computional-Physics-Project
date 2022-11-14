@@ -1,3 +1,7 @@
+#============================
+# openmp_nbody_system_pyx.pyx
+#============================
+
 import os
 os.environ["MLK_NUM_THREADS"] = "1" 
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -131,15 +135,14 @@ cdef class n_system:
         cdef:
             double G_CONST
             np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
-            int count_j, count_i
+            int count_i
             body body1
 
 
         G_CONST = 6.67430E-11
         a_to_update = np.zeros(self.nbody, dtype=object)
-        #count_j = 0
 
-        for count_i in prange(self.total_bodies, nogil=True, num_threads=self.threads):
+        for count_i in prange(self.nbody, nogil=True, num_threads=self.threads):
         #for body1 in self.bodies:
             with gil:
                 body1 = self.bodies[count_i]
@@ -151,12 +154,8 @@ cdef class n_system:
                         r_diff = r1 - r2
                         a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
                         acceleration = np.add(acceleration, a_i)
-                print("acceleration ", acceleration)
-                print("a_to_update[body1.ID] ", a_to_update[body1.ID])
-                print("body1.ID ", body1.ID)
+
                 a_to_update[body1.ID] = acceleration
-        print("a_to_update ", a_to_update)
-            
 
         for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
@@ -184,17 +183,20 @@ def main(timestep, steps, nbodies, threads):
         body body_data
         np.ndarray initial
 
-    initial = np.loadtxt("initial_conditions.csv", skiprows=2, delimiter=',', dtype=np.float64)
+    initial = np.loadtxt("initial_conditions.csv", skiprows=1, delimiter=',', dtype=np.float64)
     initial = initial[0:nbodies]
     nbody = int(len(initial))
     nbody_system = n_system(nbody, steps, threads)
-    #print("OK")
 
+    start_time = time.time()
     for i in range(nbody):
-        #print("OK %s" % i)
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
-    #print("ALL INSERTED")
 
+    print("openmp_nbody_system_pyx.pyx")
+    print("===========================")
+    print("Start {}".format(start_time))
     nbody_system.run(timestep, steps)
-    #print("END")
+    execution_time = (time.time() - start_time)
+    print("Timestep: {} s \nSteps: {} \n{} bodies \n{} threads".format(timestep, steps, nbodies, threads))
+    print("Execution time: {:.4f} s".format(execution_time))
