@@ -96,7 +96,7 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
-    cpdef np.ndarray position(self):
+    cpdef np.ndarray position(self) nogil:
         cdef np.ndarray pos
 
         pos = np.array([self.x, self.y, self.z])

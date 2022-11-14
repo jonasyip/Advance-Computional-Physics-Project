@@ -142,9 +142,9 @@ class system:
     
         """
         G_CONST = 6.67430E-11
-
         a_to_update = np.zeros(self.nbody, dtype=object)
         count_j = 0
+
         for body1 in self.bodies:
             count = 0
             acceleration = np.zeros(3, dtype=np.float64)     #Acceleration array (m/s)
