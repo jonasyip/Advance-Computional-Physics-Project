@@ -7,7 +7,7 @@ import time
 import numpy as np
 cimport numpy as np
 cimport cython
-from cython.parallel import parallel, prange 
+from cython.parallel import parallel, prange
 cimport openmp
 
 np.import_array()
@@ -33,7 +33,7 @@ cdef class frames:
         length = len(frame)
         star_data = np.zeros(length, dtype=object)
         for i, star in zip(range(length), frame):
-            data = np.array([star.name, star.mass, star.x, star.y, star.z, star.vx, star.vy, star.vz])
+            data = np.array([star.ID, star.mass, star.x, star.y, star.z, star.vx, star.vy, star.vz])
             star_data[i] = data
 
         self.system_frames[self.frame_count] = star_data
@@ -51,11 +51,12 @@ cdef class frames:
 
 
 cdef class body:
-    cdef public double name, mass, x, y, z, vx, vy, vz
+    cdef public int ID
+    cdef public double mass, x, y, z, vx, vy, vz
 
-    def __init__(self, name, mass, x, y, z, vx, vy, vz):
+    def __init__(self, ID, mass, x, y, z, vx, vy, vz):
 
-        self.name = name            #Name of the body
+        self.ID = ID                #ID of the body
         self.mass = mass            #Mass of the body   (kg)
 
         self.x = x                  #x position         (km)
@@ -96,7 +97,7 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
-    cpdef np.ndarray position(self) nogil:
+    cpdef np.ndarray position(self):
         cdef np.ndarray pos
 
         pos = np.array([self.x, self.y, self.z])
@@ -124,35 +125,40 @@ cdef class n_system:
         else:
             print("System reached maxmimum, body not added")
 
+    #@cython.wraparound(False)
+    #@cython.boundscheck(False)
     cpdef void update(self, double timestep):
         cdef:
             double G_CONST
             np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
-            int count, count_j, count_i
+            int count_j, count_i
             body body1
 
 
         G_CONST = 6.67430E-11
         a_to_update = np.zeros(self.nbody, dtype=object)
-        count_j = 0
+        #count_j = 0
 
-        for count_i in prange(self.total_bodies, nogil=True, num_threads=threads):
+        for count_i in prange(self.total_bodies, nogil=True, num_threads=self.threads):
         #for body1 in self.bodies:
-            body1 = self.bodies[count_i]
-            count = 0
-            acceleration = np.zeros(3, dtype=np.float64)     #Acceleration array (m/s)
-            for body2 in self.bodies:
-                if (body1 is not body2):
-                    r1 = body1.position()
-                    r2 = body2.position()
-                    r_diff = r1 - r2
-                    a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
-                    acceleration = np.add(acceleration, a_i)
-                    count += 1
-            a_to_update[count_j] = acceleration
-            count_j += 1
+            with gil:
+                body1 = self.bodies[count_i]
+                acceleration = np.zeros(3, dtype=np.float64)     #Acceleration (m/s)
+                for body2 in self.bodies:
+                    if (body1 is not body2):
+                        r1 = body1.position()
+                        r2 = body2.position()
+                        r_diff = r1 - r2
+                        a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
+                        acceleration = np.add(acceleration, a_i)
+                print("acceleration ", acceleration)
+                print("a_to_update[body1.ID] ", a_to_update[body1.ID])
+                print("body1.ID ", body1.ID)
+                a_to_update[body1.ID] = acceleration
+        print("a_to_update ", a_to_update)
+            
 
-        for count, body1, accel in zip(range(self.nbody), self.bodies, a_to_update):
+        for body1, accel in zip(self.bodies, a_to_update):
             body1.update(timestep, accel)
 
         self.sframes.insert(self.bodies)
