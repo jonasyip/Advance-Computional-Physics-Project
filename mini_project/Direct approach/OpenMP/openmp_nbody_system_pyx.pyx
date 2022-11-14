@@ -129,8 +129,8 @@ cdef class n_system:
         else:
             print("System reached maxmimum, body not added")
 
-    #@cython.wraparound(False)
-    #@cython.boundscheck(False)
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void update(self, double timestep):
         cdef:
             double G_CONST
@@ -188,15 +188,27 @@ def main(timestep, steps, nbodies, threads):
     nbody = int(len(initial))
     nbody_system = n_system(nbody, steps, threads)
 
-    start_time = time.time()
+    
     for i in range(nbody):
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
 
-    print("openmp_nbody_system_pyx.pyx")
+
+    print("\nopenmp_nbody_system_pyx.pyx")
     print("===========================")
-    print("Start {}".format(start_time))
+    start_time = time.time()
     nbody_system.run(timestep, steps)
-    execution_time = (time.time() - start_time)
+    end_time = time.time() 
+    execution_time = (end_time - start_time)
+    print("Start {}".format(time.ctime(int(start_time))))
+    print("End   {}".format(time.ctime(int(end_time))))
     print("Timestep: {} s \nSteps: {} \n{} bodies \n{} threads".format(timestep, steps, nbodies, threads))
     print("Execution time: {:.4f} s".format(execution_time))
+
+    #start_time,end_time,timestep,steps,bodies,threads,execution_time
+    omp_execution_history = "{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                timestep, steps, nbodies, threads, execution_time)
+    f=open('omp_execution_history.csv','a')
+    f.write("\n")
+    f.write(omp_execution_history)
+    f.close()

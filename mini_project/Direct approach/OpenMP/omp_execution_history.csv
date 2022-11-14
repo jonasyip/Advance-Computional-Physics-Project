@@ -1,0 +1,3 @@
+start_time,end_time,timestep_(s),steps,bodies,threads,execution_time_(s)
+Mon Nov 14 22:01:53 2022,Mon Nov 14 22:01:58 2022,864000,200.0,40,8,4.905586004257202
+Mon Nov 14 22:02:29 2022,Mon Nov 14 22:03:00 2022,864000,200.0,100,8,31.390923976898193
