@@ -6,6 +6,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import time
 
 class frames:
     def __init__(self, total_frames):
@@ -110,9 +111,9 @@ class body:
         
 
 
-class system:
+class n_system:
 
-    def __init__(self, nbody, steps):
+    def __init__(self, nbody):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=object)
         self.bodycount = 0
@@ -164,31 +165,41 @@ class system:
 
         self.sframes.insert(self.bodies)
 
-    def run(self, timestep, steps, display=False):
-        """
+    def run(self, timestep, steps):
         
-        
-        """
-        savepath = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python\figures"
         self.sframes = frames(steps+1)
         self.sframes.insert(self.bodies)
-
         for step in range(0, steps):
             self.update(timestep)
-            if (display == True):
-                fig = plt.figure()
-                ax = plt.axes(projection = '3d')
-                self.display(ax)
-                save1 = "%s\%s.png" % (savepath, step)
-                plt.savefig(save1)
 
         self.sframes.save()
 
+def main(timestep, steps, nbodies, comment):
 
+    initial = np.loadtxt("initial_conditions.csv", skiprows=1, delimiter=',', dtype=np.float64)
+    initial = initial[0:nbodies]
+    nbody = int(len(initial))
+    nbody_system = n_system(nbody)
 
-    def display(self, ax):
-        for body in self.bodies:
-            body.draw(ax)
+    for name, mass, x, y, z, vx, vy, vz in initial:
+        body_data = body(name, mass, x, y, z, vx, vy, vz)
+        nbody_system.insert(body_data)
 
+    print("\nnbody_system_pyx.pyx")
+    print("==========================")
+    start_time = time.time()
+    nbody_system.run(timestep, steps)
+    end_time = time.time()
+    execution_time = (end_time - start_time)
+    print("Start {}".format(time.ctime(int(start_time))))
+    print("End   {}".format(time.ctime(int(end_time))))
+    print("Timestep: {} s \nSteps: {} \n{} bodies \nComment: {}".format(timestep, steps, nbodies,comment))
+    print("Execution time: {:.4f} s".format(execution_time))
 
-
+    #start_time,end_time,timestep,steps,bodies,threads,execution_time
+    omp_execution_history = "{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                timestep, steps, nbodies, execution_time, comment)
+    f=open('python_execution_history.csv','a')
+    f.write("\n")
+    f.write(omp_execution_history)
+    f.close()

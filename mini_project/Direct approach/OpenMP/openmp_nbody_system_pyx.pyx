@@ -182,7 +182,7 @@ cdef class n_system:
 
 
 
-def main(timestep, steps, nbodies, threads):
+def main(timestep, steps, nbodies, threads, comment=None):
     cdef:
         Py_ssize_t i
         int nbody
@@ -190,11 +190,15 @@ def main(timestep, steps, nbodies, threads):
         body body_data
         np.ndarray initial
 
+    if comment is None:
+        comment = ""
+
     initial = np.loadtxt("initial_conditions.csv", skiprows=1, delimiter=',', dtype=np.float64)
     initial = initial[0:nbodies]
     nbody = int(len(initial))
     nbody_system = n_system(nbody, steps, threads)
 
+    
     
     for i in range(nbody):
         body_data = body(*initial[i])
@@ -213,8 +217,8 @@ def main(timestep, steps, nbodies, threads):
     print("Execution time: {:.4f} s".format(execution_time))
 
     #start_time,end_time,timestep,steps,bodies,threads,execution_time
-    omp_execution_history = "{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
-                                                timestep, steps, nbodies, threads, execution_time)
+    omp_execution_history = "{},{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                timestep, steps, nbodies, threads, execution_time, comment)
     f=open('omp_execution_history.csv','a')
     f.write("\n")
     f.write(omp_execution_history)

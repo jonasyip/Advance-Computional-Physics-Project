@@ -1,5 +1,4 @@
 import numpy as np
-from nbody_system import system, body
 from matplotlib import pyplot as plt
 import matplotlib.animation
 

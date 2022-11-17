@@ -1,0 +1,4 @@
+start_time,end_time,timestep_(s),steps,bodies,execution_time_(s),comments
+Thu Nov 17 12:28:42 2022,Thu Nov 17 12:28:43 2022,864000.0,200,10,0.32083773612976074,test
+Thu Nov 17 12:29:26 2022,Thu Nov 17 12:29:26 2022,864000.0,200,10,0.2613954544067383,test
+Thu Nov 17 12:29:48 2022,Thu Nov 17 12:29:48 2022,864000.0,200,10,0.29074835777282715,tesat

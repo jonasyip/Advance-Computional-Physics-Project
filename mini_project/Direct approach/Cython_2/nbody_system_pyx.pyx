@@ -184,7 +184,7 @@ cdef class n_system:
 
 
 
-def main(timestep, steps, nbodies=10):
+def main(timestep, steps, nbodies, comment):
     cdef:
         Py_ssize_t i
         int nbody
@@ -192,7 +192,7 @@ def main(timestep, steps, nbodies=10):
         body body_data
         np.ndarray initial
 
-    initial = np.loadtxt("initial_conditions.csv", skiprows=2, delimiter=',', dtype=np.float64)
+    initial = np.loadtxt("initial_conditions.csv", skiprows=1, delimiter=',', dtype=np.float64)
     initial = initial[0:nbodies]
     nbody = int(len(initial))
     nbody_system = n_system(nbody, steps)
@@ -201,7 +201,7 @@ def main(timestep, steps, nbodies=10):
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
 
-    print("\nnbody_system_pyx.pyx.pyx")
+    print("\nnbody_system_pyx.pyx")
     print("==========================")
     start_time = time.time()
     nbody_system.run(timestep, steps)
@@ -209,12 +209,12 @@ def main(timestep, steps, nbodies=10):
     execution_time = (end_time - start_time)
     print("Start {}".format(time.ctime(int(start_time))))
     print("End   {}".format(time.ctime(int(end_time))))
-    print("Timestep: {} s \nSteps: {} \n{} bodies \n{} threads".format(timestep, steps, nbodies, threads))
+    print("Timestep: {} s \nSteps: {} \n{} bodies".format(timestep, steps, nbodies))
     print("Execution time: {:.4f} s".format(execution_time))
 
     #start_time,end_time,timestep,steps,bodies,threads,execution_time
-    omp_execution_history = "{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
-                                                timestep, steps, nbodies, execution_time)
+    omp_execution_history = "{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                timestep, steps, nbodies, execution_time, comment)
     f=open('cython_execution_history.csv','a')
     f.write("\n")
     f.write(omp_execution_history)
