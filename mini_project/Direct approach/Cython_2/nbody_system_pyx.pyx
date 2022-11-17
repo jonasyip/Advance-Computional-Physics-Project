@@ -1,3 +1,8 @@
+#=====================
+# nbody_system_pyx.pyx
+#  (Cython)
+#=====================
+
 import os
 os.environ["MLK_NUM_THREADS"] = "1" 
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -23,6 +28,8 @@ cdef class frames:
         self.system_frames = np.zeros(total_frames, dtype=object)
         self.frame_count = 0
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void insert(self, object frame):
         cdef:
             int length
@@ -66,6 +73,8 @@ cdef class body:
         self.vy = vy                #y velocity         (m/s)
         self.vz = vz                #z velocity         (m/s)
     
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void update(self, double timestep, np.ndarray acceleration):
         cdef:
             double ax, ay, az               #Acceleration
@@ -96,6 +105,8 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef np.ndarray position(self):
         cdef np.ndarray pos
 
@@ -118,6 +129,8 @@ cdef class n_system:
 
         self.G_CONST = 6.67430E-11
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void insert(self, body body):
         if self.bodycount < self.nbody:
             self.bodies[self.bodycount] = body
@@ -125,6 +138,8 @@ cdef class n_system:
         else:
             print("System reached maxmimum, body not added")
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void update(self, double timestep):
         cdef:
             
@@ -144,8 +159,7 @@ cdef class n_system:
                     r1 = body1.position()
                     r2 = body2.position()
                     r_diff = r1 - r2
-                    a_i = -1*self.G_CONST*((body2.mass) / np.power(r_diff, 2))
-
+                    a_i = -1*self.G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
                     a_array[count] = a_i
                     count += 1
             acceleration = np.sum(a_array, axis=0, dtype=np.float64)
@@ -182,13 +196,26 @@ def main(timestep, steps, nbodies=10):
     initial = initial[0:nbodies]
     nbody = int(len(initial))
     nbody_system = n_system(nbody, steps)
-    print("OK")
 
     for i in range(nbody):
-        #print("OK %s" % i)
         body_data = body(*initial[i])
         nbody_system.insert(body_data)
-    #print("ALL INSERTED")
 
+    print("\nnbody_system_pyx.pyx.pyx")
+    print("==========================")
+    start_time = time.time()
     nbody_system.run(timestep, steps)
-    print("END")
+    end_time = time.time()
+    execution_time = (end_time - start_time)
+    print("Start {}".format(time.ctime(int(start_time))))
+    print("End   {}".format(time.ctime(int(end_time))))
+    print("Timestep: {} s \nSteps: {} \n{} bodies \n{} threads".format(timestep, steps, nbodies, threads))
+    print("Execution time: {:.4f} s".format(execution_time))
+
+    #start_time,end_time,timestep,steps,bodies,threads,execution_time
+    omp_execution_history = "{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                timestep, steps, nbodies, execution_time)
+    f=open('cython_execution_history.csv','a')
+    f.write("\n")
+    f.write(omp_execution_history)
+    f.close()

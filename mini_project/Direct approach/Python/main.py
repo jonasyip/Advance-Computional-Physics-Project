@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import time
 
-start_time = time.time()
+
 file_name = r"C:\Users\Student\OneDrive\Bristol University\Physics Year 4\Advanced Computational Physics\Advance-Computional-Physics-local-machine-1\mini_project\Direct approach\Python\initial_conditions.csv"
 df = pd.read_csv(file_name, header=1)
 nbody_system = np.array(df)[0:20]
@@ -26,7 +26,8 @@ ssystem = system(nbody, steps)
 for name, mass, x, y, z, vx, vy, vz in nbody_system:
     body_data = body(name, mass, x, y, z, vx, vy, vz)
     ssystem.insert(body_data)
-
+    
+start_time = time.time()
 ssystem.run(timestep, steps, False)
 execution_time = (time.time() - start_time)
 print("Execution time: {:.2f}".format(execution_time))

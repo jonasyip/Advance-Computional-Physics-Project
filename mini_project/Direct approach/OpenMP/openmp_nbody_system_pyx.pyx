@@ -27,6 +27,8 @@ cdef class frames:
         self.system_frames = np.zeros(total_frames, dtype=object)
         self.frame_count = 0
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void insert(self, object frame):
         cdef:
             int length
@@ -71,6 +73,9 @@ cdef class body:
         self.vy = vy                #y velocity         (km/s)
         self.vz = vz                #z velocity         (km/s)
     
+
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void update(self, double timestep, np.ndarray acceleration):
         cdef:
             double ax, ay, az               #Acceleration
@@ -101,6 +106,7 @@ cdef class body:
         self.vy = new_vy
         self.vz = new_vz
 
+    
     cpdef np.ndarray position(self):
         cdef np.ndarray pos
 
@@ -115,13 +121,14 @@ cdef class n_system:
         public object sframes
         int threads
 
-
     def __init__(self, nbody, steps, threads):
         self.nbody = nbody
         self.bodies = np.zeros(nbody, dtype=body)
         self.total_bodies = 0
         self.threads = threads
 
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
     cpdef void insert(self, body body):
         if self.total_bodies < self.nbody:
             self.bodies[self.total_bodies] = body
@@ -142,8 +149,8 @@ cdef class n_system:
         G_CONST = 6.67430E-11
         a_to_update = np.zeros(self.nbody, dtype=object)
 
-        for count_i in prange(self.nbody, nogil=True, num_threads=self.threads):
-        #for body1 in self.bodies:
+        for count_i in prange(self.nbody, nogil=True, num_threads=self.threads, schedule="static"):
+        #schedule=dynamic as runtime of each chunk is not known
             with gil:
                 body1 = self.bodies[count_i]
                 acceleration = np.zeros(3, dtype=np.float64)     #Acceleration (m/s)

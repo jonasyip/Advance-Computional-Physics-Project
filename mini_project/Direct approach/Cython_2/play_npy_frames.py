@@ -27,9 +27,9 @@ def animate(i):
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.set_xlim((-1E14, 1E14))
-ax.set_ylim((-1E14, 1E14))
-ax.set_zlim((-1E14, 1E14))
+ax.set_xlim((-1E10, 1E10))
+ax.set_ylim((-1E10, 1E10))
+ax.set_zlim((-1E10, 1E10))
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
