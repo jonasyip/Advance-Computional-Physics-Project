@@ -217,10 +217,16 @@ class n_system:
 def main(timestep, steps, nbodies, comment=None):
 
     MASTER_RANK = 0
+    if (MASTER_RANK == 0):
+        if (size < 2):
+            print("Not enough ranks to run")
+            comm.Abort()
+            
 
-    if ((size-1) > nbodies):
-        comm.Abort()
-        print("Cannot to distribute workers")
+        if ((size-1) > nbodies):
+            print("Cannot to distribute workers")
+            comm.Abort()
+            
 
     if comment is None:
         comment = ""
@@ -244,14 +250,16 @@ def main(timestep, steps, nbodies, comment=None):
     # 11 -
     # 21 - 
 
-    print("rank ", rank)
+    if (rank == MASTER_RANK): #Start timing
+        start_time = time.time()
+
+        
 
     for step in range(0, steps):
         #print("rank %s step %s " % (rank, step))
-
         if (rank == MASTER_RANK):
             for worker_dest in range(1, size):
-                print("worker_dest ", worker_dest)
+                #print("worker_dest ", worker_dest)
                 comm.send(master_nbody_system, dest=worker_dest, tag=11)
 
         else: #Worker
@@ -275,42 +283,24 @@ def main(timestep, steps, nbodies, comment=None):
             sframes.insert(master_nbody_system.bodies)
 
     if (rank == MASTER_RANK): #Save frame
-        sframes.save()
-        print("Done")
+        end_time = time.time()
+        sframes.save()  
 
+        print("\nnbody_system_mpi.py")
+        print("===================")
+        execution_time = (end_time - start_time)
+        print("Start {}".format(time.ctime(int(start_time))))
+        print("End   {}".format(time.ctime(int(end_time))))
+        print("Timestep: {} s \nSteps: {} \n{} bodies \nComment: {}".format(timestep, steps, nbodies,comment))
+        print("Execution time: {:.4f} s".format(execution_time))
 
-
-      
-
-    # else:
-    #     for i in range(0, steps):
-    
-
-
-    #end 
-    #sframes.save()
-
-
-    
-
-    # print("\nnbody_system_mpi.py")
-    # print("==========================")
-    # start_time = time.time()
-    # nbody_system.run(timestep, steps)
-    # end_time = time.time()
-    # execution_time = (end_time - start_time)
-    # print("Start {}".format(time.ctime(int(start_time))))
-    # print("End   {}".format(time.ctime(int(end_time))))
-    # print("Timestep: {} s \nSteps: {} \n{} bodies \nComment: {}".format(timestep, steps, nbodies,comment))
-    # print("Execution time: {:.4f} s".format(execution_time))
-
-    # #start_time,end_time,timestep,steps,bodies,threads,execution_time
-    # omp_execution_history = "{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
-    #                                             timestep, steps, nbodies, execution_time, comment)
-    # f=open('python_mpi_execution_history.csv','a')
-    # f.write("\n")
-    # f.write(omp_execution_history)
-    # f.close()
+        #start_time,end_time,processes,timestep,steps,bodies,threads,execution_time
+        omp_execution_history = "{},{},{},{},{},{},{},{}".format(time.ctime(int(start_time)), time.ctime(int(end_time)), 
+                                                    size, timestep, steps, nbodies, execution_time, comment)
+        f=open('python_mpi_execution_history.csv','a')
+        f.write("\n")
+        f.write(omp_execution_history)
+        f.close()
 
 if int(len(sys.argv)) == 4: #Without comments
     main(float(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
