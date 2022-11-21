@@ -174,7 +174,9 @@ class n_system:
 
         self.sframes.save()
 
-def main(timestep, steps, nbodies, comment):
+def main(timestep, steps, nbodies, comment=None):
+    if comment is None:
+        comment = ""
 
     initial = np.loadtxt("initial_conditions.csv", skiprows=1, delimiter=',', dtype=np.float64)
     initial = initial[0:nbodies]
@@ -185,7 +187,7 @@ def main(timestep, steps, nbodies, comment):
         body_data = body(name, mass, x, y, z, vx, vy, vz)
         nbody_system.insert(body_data)
 
-    print("\nnbody_system_pyx.pyx")
+    print("\nnbody_system.py")
     print("==========================")
     start_time = time.time()
     nbody_system.run(timestep, steps)
