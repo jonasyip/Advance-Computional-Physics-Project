@@ -13,7 +13,6 @@ cimport numpy as np
 cimport cython
 from cython.parallel import parallel, prange
 cimport openmp
-from libc.math cimport sqrt
 
 np.import_array()
 
@@ -145,52 +144,29 @@ cdef class n_system:
     cpdef void update(self, double timestep):
         cdef:
             double G_CONST
-            double[:] masses
-            double[:] positions, a_to_update
-
-            int count_i, count_j
+            np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
+            int count_i
             body body1
-            double a_x, a_y, a_z
-            double r_diff_x, r_diff_y, r_diff_z, r_diff_norm
 
-        positions = np.zeros(self.nbody, dtype=np.double)
-        masses = np.zeros(self.nbody, dtype=np.double)
-        a_to_update = np.zeros(self.nbody, dtype=np.double)
-        G_CONST = 6.67430E-11
 
-        for count_i in range(self.nbody):
-            positions[count_i][:] = self.bodies[count_i].position
-            masses[count_i] = self.bodies[count_i].mass
-            a_to_update[count_i][:] = [0, 0, 0]
         
+        a_to_update = np.zeros(self.nbody, dtype=object)
+
         for count_i in prange(self.nbody, nogil=True, num_threads=self.threads, schedule="static"):
-            for count_j in range(self.nbody):
-                if (count_i != count_j):
-                    #r1 = body1.position()
-                    #r2 = body2.position()
-                    with gil:
-                        r1_x, r1_y, r1_z = positions[count_i]
-                        r2_x, r2_y, r2_z = positions[count_j]
-
-                        r_diff_x = r1_x - r2_x
-                        r_diff_y = r1_y - r2_y
-                        r_diff_z = r1_z - r2_z
-                        r_diff_norm = sqrt(r_diff_x**2 + r_diff_y**2 + r_diff_z**2)
-                        #a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
-                        a_x = -1*G_CONST*((masses[count_j]) / (r_diff_norm**2)) * (r_diff_x / r_diff_norm)
-                        a_y = -1*G_CONST*((masses[count_j]) / (r_diff_norm**2)) * (r_diff_x / r_diff_norm)
-                        a_z = -1*G_CONST*((masses[count_j]) / (r_diff_norm**2)) * (r_diff_x / r_diff_norm)
+            with gil:
+                body1 = self.bodies[count_i]
+                for body2 in self.bodies:
+                    if (body1 is not body2):
+                        print("body1 %s body2 %s" % (body1.ID, body2.ID))
+                        self.calculate_acceleration(body1, body2)
+                
                         
-                        a_to_update[count_i][0] += a_x
-                        a_to_update[count_i][1] += a_y
-                        a_to_update[count_i][2] += a_z
 
-        print(a_to_update)
 
-        for count_i, accel in zip(range(self.nbody, a_to_update)):
-            body1 = self.nbodies[count_i]
-            body1.update(timestep, accel)
-            #a_to_update[count_i] = np.zeros(3, dtype=np.float64)
+        for body1 in self.bodies:
+            print(body1.acceleration)
+            body1.update(timestep, body1.acceleration)
+            body1.acceleration = np.zeros(3, dtype=np.float64)
 
         self.sframes.insert(self.bodies)
 
@@ -200,9 +176,9 @@ cdef class n_system:
         r2 = body2.position()
         r_diff = r1 - r2
         a_i = -1*G_CONST*((body2.mass) / np.power(np.linalg.norm(r_diff), 2)) * (r_diff / np.linalg.norm(r_diff))
-        body1.acceleration[0] = a_i[0]
-        body1.acceleration[1] = a_i[1]
-        body1.acceleration[2] = a_i[2]
+        body1.acceleration[0] += a_i[0]
+        body1.acceleration[1] += a_i[1]
+        body1.acceleration[2] += a_i[2]
         
 
 
