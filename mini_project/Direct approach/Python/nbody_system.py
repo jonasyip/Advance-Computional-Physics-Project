@@ -4,8 +4,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import sys
 import time
 
 class frames:
@@ -105,10 +104,6 @@ class body:
         """
         return np.array([self.x, self.y, self.z])
     
-    def draw(self, ax):
-
-        ax.scatter(self.x, self.y, self.z, label=self.name)
-        
 
 
 class n_system:

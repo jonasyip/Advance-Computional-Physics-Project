@@ -37,6 +37,7 @@ def main(timestep, steps, nbodies, comment=None):
     start_time = time.time()
     nbody_system.run(timestep, steps)
     end_time = time.time()
+    nbody_system.sframes.save()
     execution_time = (end_time - start_time)
     print("Start {}".format(time.ctime(int(start_time))))
     print("End   {}".format(time.ctime(int(end_time))))

@@ -13,6 +13,7 @@ cimport numpy as np
 cimport cython
 from cython.parallel import parallel, prange
 cimport openmp
+from libc.math cimport sqrt
 
 np.import_array()
 
@@ -59,7 +60,6 @@ cdef class frames:
 cdef class body:
     cdef public int ID
     cdef public double mass, x, y, z, vx, vy, vz
-    cdef public np.ndarray acceleration
 
     def __init__(self, ID, mass, x, y, z, vx, vy, vz):
 
@@ -74,8 +74,6 @@ cdef class body:
         self.vy = vy                #y velocity         (km/s)
         self.vz = vz                #z velocity         (km/s)
 
-        self.acceleration = np.zeros(3, dtype=np.float64)
-    
 
     @cython.wraparound(False)
     @cython.boundscheck(False)
@@ -141,32 +139,52 @@ cdef class n_system:
 
     @cython.wraparound(False)
     @cython.boundscheck(False)
-    cpdef void update(self, double timestep):
-        cdef:
-            double G_CONST
-            np.ndarray a_to_update, r1, r2, r_diff, a_i, acceleration
-            int count_i
-            body body1
-
-
-        
-        a_to_update = np.zeros(self.nbody, dtype=object)
+    cpdef void openmp(self, double[:] x, double[:] y, double[:] z, double[:] ax, double[:] ay, double[:] az, 
+    double[:] masses):
+        cdef double G_CONST = 6.67430E-11
 
         for count_i in prange(self.nbody, nogil=True, num_threads=self.threads, schedule="static"):
-            with gil:
-                body1 = self.bodies[count_i]
-                for body2 in self.bodies:
-                    if (body1 is not body2):
-                        print("body1 %s body2 %s" % (body1.ID, body2.ID))
-                        self.calculate_acceleration(body1, body2)
-                
-                        
+            for count_j in self.nbody:
+                if (count_i != count_j):
+                    body2_mass = masses[count_j]
+                    r_diff = sqrt((x[count_i] - x[count_j])**2 + (y[count_i] - y[count_j])**2 + (z[count_i] - z[count_j])**2)
+                    ax[count_i] += -1*G_CONST*((body2_mass) / r_diff**2) * ((x[count_i] - x[count_j]) / r_diff)
+                    ay[count_i] += -1*G_CONST*((body2_mass) / r_diff**2) * ((y[count_i] - y[count_j]) / r_diff)
+                    az[count_i] += -1*G_CONST*((body2_mass) / r_diff**2) * ((z[count_i] - z[count_j]) / r_diff)
 
+        for ax1, ay1, az1 in zip(ax, ay, az):
+            acceleration = np.zeros(3, dtype=np.double)
+            acceleration[0] = ax1
+            acceleration[1] = ax2
+            acceleration[2] = ax3
+            body1.update(timestep, acceleration)
 
-        for body1 in self.bodies:
-            print(body1.acceleration)
-            body1.update(timestep, body1.acceleration)
-            body1.acceleration = np.zeros(3, dtype=np.float64)
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
+    cpdef void update(self, double timestep):
+        cdef:
+            
+            int count_i
+            body body1
+            np.ndarray acceleration
+
+        cdef double[:] x = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] y = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] z = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] ax = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] ay = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] az = np.zeros(self.nbody, dtype=np.double)
+        cdef double[:] masses = np.zeros(self.nbody, dtype=np.double) 
+
+        for count_i, body1 in (range(self.nbody), self.bodies):
+            masses[count_i] = body1.masses
+            x[count_i] = body1.x
+            y[count_i] = body1.y
+            z[count_i] = body1.z
+
+        G_CONST = 6.67430E-11
+
+        self.openmp(x, y, z, ax, ay, az, masses)
 
         self.sframes.insert(self.bodies)
 

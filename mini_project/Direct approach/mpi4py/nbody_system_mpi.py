@@ -1,11 +1,15 @@
+#=======================
+# nbody_system_frames.py
+# 
+# mpiexec -np <PROCESSES> python nbody_system_frames <TIMESTEP> <ITERATIONS> <NBODIES> <(COMMENTS)>
+
+
 import os
 os.environ["MLK_NUM_THREADS"] = "1" 
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 from mpi4py import MPI
 import time
 import sys
@@ -167,14 +171,14 @@ class n_system:
         lower_body_id = round(nbody_per_rank * (rank - 1))
         upper_body_id = round(rank * nbody_per_rank)
 
-        print("\nrank ", rank)
-        print("self.nbody ", self.nbody)
-        print("self.bodycount ", self.bodycount)
-        print("size ", size)
-        print("self.nbody_per_rank ", nbody_per_rank)
-        print("self.lower_body_id ", lower_body_id)
-        print("self.upper_body_id ", upper_body_id)
-        print("\n")
+        # print("\nrank ", rank)
+        # print("self.nbody ", self.nbody)
+        # print("self.bodycount ", self.bodycount)
+        # print("size ", size)
+        # print("self.nbody_per_rank ", nbody_per_rank)
+        # print("self.lower_body_id ", lower_body_id)
+        # print("self.upper_body_id ", upper_body_id)
+        # print("\n")
 
         for body_id in range(lower_body_id, upper_body_id):
             #print("body_id ", body_id)
@@ -284,6 +288,7 @@ def main(timestep, steps, nbodies, comment=None):
 
     if (rank == MASTER_RANK): #Save frame
         end_time = time.time()
+        
         sframes.save()  
 
         print("\nnbody_system_mpi.py")
@@ -308,3 +313,4 @@ elif int(len(sys.argv)) == 5: #With comments
     main(float(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), str(sys.argv[4]))
 else:
     print("Usage: python {} <TIMESTEP> <ITERATIONS> <NBODIES> <(COMMENTS)>".format(sys.argv[0]))
+
